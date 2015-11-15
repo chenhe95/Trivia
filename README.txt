@@ -1,4 +1,4 @@
-Trivia
+﻿Trivia
 Motivation: We thought it was a fun way to incorporate a movie database to make a trivia/quiz game to
 test users’ movie knowledge.
 Features that will definitely be implemented:
@@ -25,12 +25,12 @@ Technologies:
 
 Responsibilities: (TODO)
 - Jason Tang – clean up the data, come up with schema design
-- He Chen – design front end using Java Swing
+- He Chen – design front end using Java Swing, establishing DB connection
 - Fanglin Lu – think of ideas for NoSQL part, set up AWS
 - Jay Jung – help with query designs and backend components
 
 Relational Schema:
-Movies (mid integer, rating integer, director VarChar(30))- key mid
+Movies (mid integer, name VarChar(30), rating double, director VarChar(30))- key mid
 Movies_genres (mid integer, genre VarChar(15))- key mid, genre
 Acts (mid integer, aid integer)- key mid, aid
 Actors (aid integer, name VarChar(30), Date_of_birth Date, Date_of_death Date)- key aid
