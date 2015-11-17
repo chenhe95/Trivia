@@ -31,10 +31,24 @@ public class QuestionGUI extends javax.swing.JFrame {
     public QuestionGUI(MainGUI main, List<Question> questions) {
         this.main = main;
         this.questions = questions;
+        for (int i = 0; i < questions.size(); i++) {
+            answers.put(i, Integer.MAX_VALUE);
+        }
         initComponents();
-
+        questionPrevious.setEnabled(false);
+        questionIndexDisplay.setText("(0/" + questions.size() + ")");
         // assumes questions is not empty
         loadQuestion(questions.get(questionIndex));
+    }
+    
+    private int questionCountLockedIn() {
+        int counter = 0;
+        for (int v : answers.values()) {
+            if (v != Integer.MAX_VALUE) {
+                counter++;
+            }
+        }
+        return counter;
     }
 
     /**
@@ -55,6 +69,7 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionPrevious = new javax.swing.JButton();
         submit = new javax.swing.JButton();
         exit = new javax.swing.JButton();
+        questionIndexDisplay = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -65,7 +80,7 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionText.setRows(5);
         jScrollPane2.setViewportView(questionText);
 
-        questionNext.setText("Next Question");
+        questionNext.setText("Lock in Answer; Next Question");
         questionNext.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 questionNextActionPerformed(evt);
@@ -93,6 +108,8 @@ public class QuestionGUI extends javax.swing.JFrame {
             }
         });
 
+        questionIndexDisplay.setText("        ");
+
         javax.swing.GroupLayout bkgPanelLayout = new javax.swing.GroupLayout(bkgPanel);
         bkgPanel.setLayout(bkgPanelLayout);
         bkgPanelLayout.setHorizontalGroup(
@@ -108,7 +125,10 @@ public class QuestionGUI extends javax.swing.JFrame {
                             .addComponent(questionNext, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(questionPrevious, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
                             .addComponent(submit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(exit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(exit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(bkgPanelLayout.createSequentialGroup()
+                        .addComponent(questionIndexDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         bkgPanelLayout.setVerticalGroup(
@@ -128,7 +148,9 @@ public class QuestionGUI extends javax.swing.JFrame {
                         .addComponent(submit)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(bkgPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(questionIndexDisplay)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())))
         );
@@ -178,7 +200,7 @@ public class QuestionGUI extends javax.swing.JFrame {
 
     private void questionNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_questionNextActionPerformed
         int selectedIndex = questionSelect.getSelectedIndex();
-        if (questionIndex < questions.size() - 1) {
+        if (questionIndex <= questions.size() - 1) {
             Question current = questions.get(questionIndex);
             if (current.getAnswer() == selectedIndex) {
                 if (main.getQuestionHandling() == 1) {
@@ -190,7 +212,15 @@ public class QuestionGUI extends javax.swing.JFrame {
                 }
             }
             answers.put(questionIndex, selectedIndex);
-            loadQuestion(questions.get(++questionIndex));
+            questionIndexDisplay.setText("(" + questionCountLockedIn() + "/" + questions.size() + ")");
+            if (questionIndex < questions.size() - 1) {
+                loadQuestion(questions.get(++questionIndex));
+                if (questionIndex > 0 && !questionPrevious.isEnabled()) {
+                    questionPrevious.setEnabled(true);
+                }
+            } else {
+                displayMessage("Information", "No more questions left! Go over previous questions if available or click submit to see statistics!");
+            }
         }
     }//GEN-LAST:event_questionNextActionPerformed
 
@@ -200,6 +230,10 @@ public class QuestionGUI extends javax.swing.JFrame {
         } else {
             displayMessage("Invalid Operation", "You cannot change the answer to a question after the answer to that question has already been revealed!");
         }
+        if (questionIndex == 0 && questionPrevious.isEnabled()) {
+            questionPrevious.setEnabled(false);
+        }
+        questionIndexDisplay.setText("(" + questionCountLockedIn() + "/" + questions.size() + ")");
     }//GEN-LAST:event_questionPreviousActionPerformed
 
     private void displayMessage(String title, String message) {
@@ -221,6 +255,7 @@ public class QuestionGUI extends javax.swing.JFrame {
     private javax.swing.JButton exit;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel questionIndexDisplay;
     private javax.swing.JButton questionNext;
     private javax.swing.JButton questionPrevious;
     private javax.swing.JList questionSelect;
