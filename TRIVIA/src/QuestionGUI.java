@@ -1,8 +1,11 @@
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -30,6 +33,8 @@ public class QuestionGUI extends javax.swing.JFrame {
         this.questions = questions;
         initComponents();
 
+        // assumes questions is not empty
+        loadQuestion(questions.get(questionIndex));
     }
 
     /**
@@ -55,6 +60,7 @@ public class QuestionGUI extends javax.swing.JFrame {
 
         jScrollPane1.setViewportView(questionSelect);
 
+        questionText.setEditable(false);
         questionText.setColumns(20);
         questionText.setRows(5);
         jScrollPane2.setViewportView(questionText);
@@ -142,7 +148,27 @@ public class QuestionGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void submitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitActionPerformed
+        // if they click submit, they cannot go and change their questions later
+        submit.setEnabled(false);
+        questionNext.setEnabled(false);
+        questionPrevious.setEnabled(false);
+        int correct = 0;
+        int total = 0;
+        for (Entry<Integer, Integer> entry : answers.entrySet()) {
+            if (questions.get(entry.getKey()).getAnswer() == entry.getValue()) {
+                ++correct;
+            }
+            ++total;
+        }
+        String result = "You have answered " + ((100 * correct) / total) + " percent of questions correctly (" + correct + " / " + total + ")";
 
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                ResultsGUI rGUI = new ResultsGUI(result);
+                rGUI.setVisible(true);
+            }
+        });
     }//GEN-LAST:event_submitActionPerformed
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
@@ -151,13 +177,19 @@ public class QuestionGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_exitActionPerformed
 
     private void questionNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_questionNextActionPerformed
+        int selectedIndex = questionSelect.getSelectedIndex();
         if (questionIndex < questions.size() - 1) {
             Question current = questions.get(questionIndex);
-            if (current.getAnswer() == questionSelect.getSelectedIndex()) {
-                displayMessage("YES!", "You have answered this question correctly.");
+            if (current.getAnswer() == selectedIndex) {
+                if (main.getQuestionHandling() == 1) {
+                    displayMessage("YES!", "You have answered this question correctly.");
+                }
             } else {
-                displayMessage("NO!", "You have answered this question incorrectly. The correct answer is " + current.getChoices().get(current.getAnswer()));
+                if (main.getQuestionHandling() == 1) {
+                    displayMessage("NO!", "You have answered this question incorrectly. The correct answer is " + current.getChoices().get(current.getAnswer()));
+                }
             }
+            answers.put(questionIndex, selectedIndex);
             loadQuestion(questions.get(++questionIndex));
         }
     }//GEN-LAST:event_questionNextActionPerformed
@@ -181,6 +213,7 @@ public class QuestionGUI extends javax.swing.JFrame {
         }
         questionSelect.setModel(dlm);
         questionText.setText(q.getQuestion());
+        questionSelect.setSelectedIndex(0);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

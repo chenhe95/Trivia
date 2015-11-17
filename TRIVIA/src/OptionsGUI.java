@@ -44,14 +44,29 @@ public class OptionsGUI extends javax.swing.JFrame {
 
         jLabel1.setText("Select difficulty:");
 
-        difficultySelect.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Beginner", "Easy", "Medium", "Hard", "Expert" }));
+        difficultySelect.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Beginner", "Easy", "Medium", "Hard" }));
+        difficultySelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                difficultySelectActionPerformed(evt);
+            }
+        });
 
         buttonGroup1.add(showResultsOver);
         showResultsOver.setSelected(true);
         showResultsOver.setText("Show results after entire quiz is over");
+        showResultsOver.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showResultsOverActionPerformed(evt);
+            }
+        });
 
         buttonGroup1.add(showResultsQuestion);
         showResultsQuestion.setText("Show results after every question");
+        showResultsQuestion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showResultsQuestionActionPerformed(evt);
+            }
+        });
 
         apply.setText("Apply");
         apply.addActionListener(new java.awt.event.ActionListener() {
@@ -126,14 +141,30 @@ public class OptionsGUI extends javax.swing.JFrame {
             } else if (showResultsQuestion.isSelected()) {
                 main.setQuestionHandling(1);
             }
+            System.out.println("Settings set: Difficulty="
+                    + main.getDifficulty() + " QuestionHandling=" + main.getQuestionHandling());
+            setVisible(false);
         } else {
-            JOptionPane.showMessageDialog(null, "Please finish the current quiz before modifying the options", "Invalid Change", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    "Please finish the current quiz before modifying the options", "Invalid Change", JOptionPane.INFORMATION_MESSAGE);
         }
     }//GEN-LAST:event_applyActionPerformed
 
     private void cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelActionPerformed
         setVisible(false);
     }//GEN-LAST:event_cancelActionPerformed
+
+    private void difficultySelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_difficultySelectActionPerformed
+        // main.setDifficulty(difficultySelect.getSelectedIndex());
+    }//GEN-LAST:event_difficultySelectActionPerformed
+
+    private void showResultsOverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showResultsOverActionPerformed
+        // main.setQuestionHandling(0);
+    }//GEN-LAST:event_showResultsOverActionPerformed
+
+    private void showResultsQuestionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showResultsQuestionActionPerformed
+        // main.setQuestionHandling(1);
+    }//GEN-LAST:event_showResultsQuestionActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
