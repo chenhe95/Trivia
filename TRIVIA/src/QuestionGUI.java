@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -18,7 +19,8 @@ import javax.swing.SwingUtilities;
  */
 public class QuestionGUI extends javax.swing.JFrame {
 
-    private List<Question> questions;
+	private static final long serialVersionUID = 1L;
+	private List<Question> questions;
     private MainGUI main;
 
     // given the index, what was the answer given?
@@ -62,7 +64,7 @@ public class QuestionGUI extends javax.swing.JFrame {
 
         bkgPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        questionSelect = new javax.swing.JList();
+        questionSelect = new JList<String>();
         jScrollPane2 = new javax.swing.JScrollPane();
         questionText = new javax.swing.JTextArea();
         questionNext = new javax.swing.JButton();
@@ -165,7 +167,7 @@ public class QuestionGUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-
+        questionText.setLineWrap(true);
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -182,8 +184,8 @@ public class QuestionGUI extends javax.swing.JFrame {
             }
             ++total;
         }
-        String result = "You have answered " + ((100 * correct) / total) + " percent of questions correctly (" + correct + " / " + total + ")";
-
+        final String result = "You have answered " + ((100 * correct) / total) + " percent of questions correctly (" + correct + " / " + total + ")";
+ 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -241,7 +243,7 @@ public class QuestionGUI extends javax.swing.JFrame {
     }
 
     public void loadQuestion(Question q) {
-        DefaultListModel dlm = new DefaultListModel();
+        DefaultListModel<String> dlm = new DefaultListModel<>();
         for (String choices : q.getChoices()) {
             dlm.addElement(choices);
         }
@@ -258,7 +260,7 @@ public class QuestionGUI extends javax.swing.JFrame {
     private javax.swing.JLabel questionIndexDisplay;
     private javax.swing.JButton questionNext;
     private javax.swing.JButton questionPrevious;
-    private javax.swing.JList questionSelect;
+    private javax.swing.JList<String> questionSelect;
     private javax.swing.JTextArea questionText;
     private javax.swing.JButton submit;
     // End of variables declaration//GEN-END:variables

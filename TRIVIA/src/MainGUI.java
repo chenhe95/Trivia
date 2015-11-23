@@ -10,12 +10,15 @@ import javax.swing.SwingUtilities;
  */
 
 /**
- *
+ * 
  * @author He
- */
+ */ 
 public class MainGUI extends javax.swing.JFrame {
 
-    private static final int MAX_NUMBER_QUESTIONS = 20;
+	private static final long serialVersionUID = 8064285163713571914L;
+
+
+	private static final int MAX_NUMBER_QUESTIONS = 20;
     
     
     private boolean modifiable = true;

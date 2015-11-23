@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,7 @@ public class Question {
 	private List<String> choices;
 	private int answer;
 
-	private static final int questionTypeN = 2;
+	private static final int questionTypeN = 3;
 	private static final int choiceLimit = 5; // maximum number of choices
 	// the resulting query must have at least this many valid tuples
 	private static final int resultThreshold = 20;
@@ -89,6 +90,7 @@ public class Question {
 	}
 
 	private static void loadIndex(int qType, int difficulty, int choiceSize) throws SQLException {
+		int offset = (int) (Math.random() * 3);
 		switch (qType) {
 		case 0:
 			int skip = maxSkipNumber(choiceSize, difficulty) / 2;
@@ -97,10 +99,11 @@ public class Question {
 			ArrayList<String> movies = new ArrayList<>();
 			ArrayList<Integer> years = new ArrayList<>();
 			Connection connection = DBConnect.getConnection();
+
 			ResultSet rs = null;
 			try {
-				String qry = "SELECT * from (SELECT @row := @row +1 AS rownum, name, rating FROM (SELECT @row := 0) r, movie.movies) ranked WHERE rownum % "
-						+ skip + " = 1 AND rating > " + getRating(difficulty);
+				String qry = "SELECT * from (SELECT @row := @row +1 AS rownum, name, rating FROM (SELECT @row := 0) r, movie.movies offset "
+						+ ") ranked WHERE rownum % " + skip + " = 1 AND rating > " + getRating(difficulty);
 
 				Statement s = connection.createStatement();
 				System.out.println("Executing: " + qry);
@@ -167,8 +170,8 @@ public class Question {
 					if (!genres.containsKey(nameString)) {
 						genres.put(nameString, new SQLGenreSet());
 					}
-                                        SQLGenreSet sqlGenre = genres.get(nameString);
-                                        sqlGenre.addGenre(genreString);
+					SQLGenreSet sqlGenre = genres.get(nameString);
+					sqlGenre.addGenre(genreString);
 				}
 				questionCache.put(getCacheKey(1, difficulty), new QuestionSetWrapper<String, SQLGenreSet>(
 						new ArrayList<String>(genres.keySet()), new ArrayList<SQLGenreSet>(genres.values())));
@@ -218,8 +221,8 @@ public class Question {
 	}
 
 	private static int getCacheKey(int qType, int difficulty) {
-                // questionTypeN * qType + difficulty when fully implemented
-		return 10 * qType + difficulty;
+		// questionTypeN * qType + difficulty when fully implemented
+		return 20 * qType + difficulty;
 	}
 
 	/**
@@ -242,6 +245,7 @@ public class Question {
 		boolean dbConnect = false;
 		switch ((int) (Math.random() * questionTypeN)) {
 		case 0:
+			// what year is this movie released?
 			ArrayList<String> movies = null;
 			ArrayList<Integer> years = null;
 			if (!questionCache.containsKey(getCacheKey(0, difficulty)) || Math.random() <= refreshThreshold) {
@@ -270,14 +274,6 @@ public class Question {
 			// populate choices with (choiceLimit - 1) elements
 			for (int i = 0; i < choiceLimit - 1; ++i) {
 
-				// previous algorithm looked up 5 random movie years
-				// but it ended up returning similar years
-				// int index = (int) (Math.random() * movies.size());
-				// if (index != indexSelected) {
-				// choices.add(Integer.toString(years.get(index)));
-				// } else if (Math.random() > 0.15) {
-				// --i;
-				// }
 				if (Math.random() > 0.70) {
 					int randomCloseYear = yearSelected;
 					if (yearSelected < 2000 && Math.random() > 0.50) {
@@ -329,24 +325,74 @@ public class Question {
 				}
 			}
 			indexSelected = (int) (Math.random() * movies.size());
-                        String movieSelected = movies.get(indexSelected);
+			String movieSelected = movies.get(indexSelected);
 			question = "What set of genres best matches the movie " + movieSelected + "?";
 			SQLGenreSet genreSetSelected = genres.get(indexSelected);
-                        HashSet<SQLGenreSet> genresChosen = new HashSet<>(); 
+			HashSet<SQLGenreSet> genresChosen = new HashSet<>();
 			for (int i = 0; i < choiceLimit - 1; ++i) {
 				int index = (int) (Math.random() * movies.size());
 				SQLGenreSet genreSet = genres.get(index);
 				if (index != indexSelected && !genresChosen.contains(genreSet) && !genreSet.equals(genreSetSelected)) {
 					choices.add(genreSet.toString());
-                                        genresChosen.add(genreSet);
+					genresChosen.add(genreSet);
 				} else if (Math.random() > 0.10) {
 					--i;
-				} 
+				}
 			}
-                        answer = (int) (Math.random() * (choices.size() + 1));
-                        choices.add(answer, genreSetSelected.toString());
+			answer = (int) (Math.random() * (choices.size() + 1));
+			choices.add(answer, genreSetSelected.toString());
 			return new Question(question, choices, answer);
 		case 2:
+			// which of these movies is the oldest?
+			movies = null;
+			years = null;
+			if (!questionCache.containsKey(getCacheKey(0, difficulty)) || Math.random() <= refreshThreshold) {
+				dbConnect = true;
+				loadIndex(0, difficulty, choiceSize);
+			}
+
+			movies = (ArrayList<String>) questionCache.get(getCacheKey(0, difficulty)).getPropertyList();
+			years = (ArrayList<Integer>) questionCache.get(getCacheKey(0, difficulty)).getAnswerList();
+
+			if (movies.size() < resultThreshold) {
+				System.out.println("Insufficient amount of elements for question type: (" + movies.size() + ", 3)");
+				System.out.println("Re-generating question without skipping");
+				return generateQuestion(difficulty, choiceSize, false);
+			} else {
+				System.out.println("Valid result set, proceeding with computations");
+				if (!questionCache.containsKey(getCacheKey(0, difficulty)) || dbConnect) {
+					questionCache.put(getCacheKey(0, difficulty),
+							new QuestionSetWrapper<String, Integer>(movies, years));
+				}
+			}
+			// randomly generate 5 movies that were made in different years
+			TreeMap<Integer, String> movieYearPair = new TreeMap<>();
+			for (int i = 0; i < choiceLimit; ++i) {
+				indexSelected = (int) (Math.random() * movies.size());
+				if (movieYearPair.containsKey(years.get(indexSelected))) {
+					--i;
+					continue;
+				}
+				movieYearPair.put(years.get(indexSelected), movies.get(indexSelected));
+			}
+			movies = new ArrayList<String>(movieYearPair.values());
+			years = new ArrayList<Integer>(movieYearPair.keySet());
+			years.remove(0);
+			String lowestYearString = movies.remove(0);
+			int iter_size = movies.size();
+			for (int i = 0; i < iter_size; ++i) {
+				int random_index = (int) (movies.size() * Math.random());
+				choices.add(movies.remove(random_index));
+				years.remove(random_index);
+			}
+			answer = (int) (Math.random() * (choices.size() + 1));
+			choices.add(answer, lowestYearString);
+			question = "Which of these movies (";
+			for (int i = 0; i < choices.size(); ++i) {
+				question = question + choices.get(i) + ((i == choices.size() - 1) ? "" : ", ");
+			}
+			question = question + ") was made the earliest?";
+			return new Question(question, choices, answer);
 		case 3:
 		case 4:
 		case 5:
