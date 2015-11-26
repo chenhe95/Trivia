@@ -27,7 +27,7 @@ public class Question {
 	private List<String> choices;
 	private int answer;
 
-	private static final int questionTypeN = 3;
+	private static final int questionTypeN = 10;
 	private static final int choiceLimit = 5; // maximum number of choices
 	// the resulting query must have at least this many valid tuples
 	private static final int resultThreshold = 20;
@@ -91,13 +91,15 @@ public class Question {
 
 	private static void loadIndex(int qType, int difficulty, int choiceSize) throws SQLException {
 		int offset = (int) (Math.random() * 3);
+		ArrayList<String> actorNames = new ArrayList<>();
+		ArrayList<String> actorDOBs = new ArrayList<>();
+		ArrayList<String> movies = new ArrayList<>();
+		ArrayList<Integer> years = new ArrayList<>();
 		switch (qType) {
 		case 0:
 			int skip = maxSkipNumber(choiceSize, difficulty) / 2;
 			skip += (int) (Math.random() * skip);
 			skip = skip * 3 / 4;
-			ArrayList<String> movies = new ArrayList<>();
-			ArrayList<Integer> years = new ArrayList<>();
 			Connection connection = DBConnect.getConnection();
 
 			ResultSet rs = null;
@@ -131,7 +133,7 @@ public class Question {
 							name = name + " " + token;
 						}
 					}
-					if (year > 0 && !name.equals("")) {
+					if (year > 0 && !name.matches("(\\s)*")) {
 						// from this, we guarantee that the indexes will
 						// match
 						// for (movie, year)
@@ -190,6 +192,38 @@ public class Question {
 		case 8:
 		case 9:
 		case 10:
+			skip = maxSkipNumberActor(choiceSize) / 2;
+			skip += (int) (Math.random() * skip);
+			skip = skip * 3 / 4;
+			connection = DBConnect.getConnection();
+
+			rs = null;
+			try {
+				String qry = "select * from (select @row := @row +1 as rownum, A.name as a_name, A.Date_of_birth as a_DOB from (SELECT @row := 0) r, movie.actors as A where A.Date_of_birth like '%%%%-%%-%%') ranked where rownum % "
+						+ skip + " = 1";
+
+				Statement s = connection.createStatement();
+				System.out.println("Executing: " + qry);
+				rs = s.executeQuery(qry);
+
+				// rs.next() is actually very slow so we would
+				// like to minimize the time by caching the results
+				while (rs.next() && actorNames.size() <= choiceSize) {
+					String name = rs.getString("a_name");
+					String dob = rs.getString("a_DOB");
+					
+					if (!dob.matches("(\\s)*") && !name.matches("(\\s)*")) {
+						actorNames.add(name);
+						actorDOBs.add(dob);
+					}
+				}
+				questionCache.put(getCacheKey(10, difficulty), new QuestionSetWrapper<String, String>(actorNames, actorDOBs));
+			} finally {
+				if (connection != null) {
+					connection.close();
+				}
+			}
+			break;
 		default:
 		}
 	}
@@ -218,6 +252,10 @@ public class Question {
 		default:
 			return 22381 / choiceSize - 1;
 		}
+	}
+
+	private static int maxSkipNumberActor(int choiceSize) {
+		return 38726 / choiceSize;
 	}
 
 	private static int getCacheKey(int qType, int difficulty) {
@@ -319,10 +357,6 @@ public class Question {
 				return generateQuestion(difficulty, choiceSize, false);
 			} else {
 				System.out.println("Valid result set, proceeding with computations");
-				if (!questionCache.containsKey(getCacheKey(1, difficulty)) || dbConnect) {
-					questionCache.put(getCacheKey(1, difficulty),
-							new QuestionSetWrapper<String, SQLGenreSet>(movies, genres));
-				}
 			}
 			indexSelected = (int) (Math.random() * movies.size());
 			String movieSelected = movies.get(indexSelected);
@@ -360,10 +394,6 @@ public class Question {
 				return generateQuestion(difficulty, choiceSize, false);
 			} else {
 				System.out.println("Valid result set, proceeding with computations");
-				if (!questionCache.containsKey(getCacheKey(0, difficulty)) || dbConnect) {
-					questionCache.put(getCacheKey(0, difficulty),
-							new QuestionSetWrapper<String, Integer>(movies, years));
-				}
 			}
 			// randomly generate 5 movies that were made in different years
 			TreeMap<Integer, String> movieYearPair = new TreeMap<>();
@@ -399,9 +429,41 @@ public class Question {
 		case 6:
 		case 7:
 		case 8:
+			// just re-generate question since incomplete code 
+			return generateQuestion(difficulty, choiceSize, skipElements);
 		case 9:
+			
 		case 10:
 			// which actor is associated with date of birth x?
+			ArrayList<String> aName = null;
+			ArrayList<String> aDOB = null;
+			if (!questionCache.containsKey(getCacheKey(10, difficulty)) || Math.random() <= refreshThreshold) {
+				dbConnect = true;
+				loadIndex(10, difficulty, choiceSize);
+			}
+			aName = (ArrayList<String>) questionCache.get(getCacheKey(10, difficulty)).getPropertyList();
+			aDOB = (ArrayList<String>) questionCache.get(getCacheKey(10, difficulty)).getAnswerList();
+			if (aName.size() < resultThreshold) {
+				System.out.println("Insufficient amount of elements for question type: (" + aName.size() + ", 10)");
+				System.out.println("Re-generating question without skipping");
+				return generateQuestion(difficulty, choiceSize, false);
+			} else {
+				System.out.println("Valid result set, proceeding with computations");
+			}
+			ArrayList<Integer> randomSelects = new ArrayList<>();
+			for (int i = 0; i < choiceLimit; ++i) {
+				int randomIndex = (int) (Math.random() * aName.size());
+				if (!randomSelects.contains(randomIndex) && !choices.contains(aDOB.get(randomIndex))) {
+					randomSelects.add(randomIndex);
+					choices.add(aDOB.get(randomIndex));
+				} else {
+					--i;
+				}
+			}
+			// randomSelects now contains 5 random indices to (actor, DOB) pair
+			answer = (int) (Math.random() * randomSelects.size());
+			question = "On which day was actor " + aName.get(randomSelects.get(answer)) + " born? (YYYY-MM-DD)";
+			return new Question(question, choices, answer);
 		default:
 		}
 		return null;

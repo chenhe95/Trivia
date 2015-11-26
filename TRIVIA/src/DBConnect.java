@@ -33,15 +33,20 @@ public class DBConnect {
 		String preQuery = "(SELECT * from (SELECT @row := @row +1 as rownum, name as name, mid as mid, rating as rating FROM (SELECT @row := 0) r, movie.movies) ranked WHERE rownum % 4 = 1 AND rating > 3)";
 		//testQuery = "select movie.movie_genre.mid as m_id, movie.movie_genre.genre as m_genre from movie.movie_genre inner join movie.movies on movie.movies.mid = movie.movie_genre.mid where movie.movies.rating > 4";
 		testQuery = "select movie.movie_genre.genre as m_genre, T.name as m_name from movie.movie_genre inner join " + preQuery + "as T on T.mid = movie.movie_genre.mid";
-		Connection connection = getConnection();
+		//testQuery = "select count(*) as cn from movie.actors as A where A.Date_of_birth LIKE '%%%%-%%-%%'";
+		testQuery = "select * from (select @row := @row +1 as rownum, A.name as a_name, A.Date_of_birth as a_DOB from (SELECT @row := 0) r, movie.actors as A where A.Date_of_birth like '%%%%-%%-%%') ranked where rownum % 380 = 1";
+		// select T.a_name, T.a_DOB from (select @row := @row +1 as rownum, A.name as a_name, A.Date_of_birth as a_DOB from (SELECT @row := 0) r, movie.actors as A) as T ranked WHERE rownum % 4 = 1"
+		//+ ") ranked WHERE rownum % " + skip + " = 1
+		Connection connection = getConnection(); //A.name as a_name, A.Date_of_birth // <> 'null' and A.Date_of_birth <> '' and A.Date_of_birth <> ' '
 		Statement statement = connection.createStatement();
 		statement.executeQuery(testQuery);
 		ResultSet result = statement.getResultSet();
 		while (result.next()) {
 			//int mid = result.getInt("mid");
 			//double rating = result.getDouble("rating");
-			System.out.println("" + result.getString("m_name") + " " + result.getString("m_genre"));
-			//System.out.println(result.getInt("m_count"));
+			//System.out.println("" + result.getString("m_name") + " " + result.getString("m_genre"));
+			System.out.println(result.getString("a_name") + " " + result.getString("a_DOB"));
+			//System.out.println(result.getInt("cn"));
 		}
 	}
 
