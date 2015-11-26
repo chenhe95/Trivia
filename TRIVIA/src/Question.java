@@ -34,6 +34,10 @@ public class Question {
 	// 3% chance to generate fresh data on question generation
 	private static double refreshThreshold = 0.03;
 
+	private static final String[] ALL_GENRES = { "Adventure", "Animation", "Children", "Comedy", "Fantasy", "Action",
+			"Drama", "Romance", "Crime", "Thriller", "IMAX", "Documentary", "Film-Noir", "Sci-Fi", "War", "Horror",
+			"Western", "Fantasy", "Mystery", "Musical", "Animation" };
+
 	@SuppressWarnings("rawtypes")
 	private static final HashMap<Integer, QuestionSetWrapper> questionCache = new HashMap<>();
 
@@ -81,7 +85,16 @@ public class Question {
 		List<Question> questionList = new ArrayList<>(questionSetSize);
 		for (int i = 0; i < questionSetSize; ++i) {
 			try {
-				questionList.add(generateQuestion(difficulty, 4 * questionSetSize, true));
+				Question q = generateQuestion(difficulty, 4 * questionSetSize, true);
+				q.question = q.getQuestion().replaceAll("\\s\\s", " ");
+				q.question = q.getQuestion().replaceAll("\\(\\s", "(");
+				q.question = q.getQuestion().replaceAll("\\s\\)", ")");
+				q.question = q.getQuestion().replaceAll("\\s\\?", "?");
+				q.question = q.getQuestion().replaceAll("\\s\\.", ".");
+				for (int j = 0; j < q.getChoices().size(); ++j) {
+					q.getChoices().set(j, q.getChoices().get(j).trim());
+				}
+				questionList.add(q);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -89,17 +102,21 @@ public class Question {
 		return questionList;
 	}
 
-	private static void loadIndex(int qType, int difficulty, int choiceSize) throws SQLException {
+	private static void loadIndex(int qType, int difficulty, int choiceSize, boolean skipElements) throws SQLException {
 		int offset = (int) (Math.random() * 3);
 		ArrayList<String> actorNames = new ArrayList<>();
 		ArrayList<String> actorDOBs = new ArrayList<>();
 		ArrayList<String> movies = new ArrayList<>();
 		ArrayList<Integer> years = new ArrayList<>();
-		switch (qType) {
-		case 0:
-			int skip = maxSkipNumber(choiceSize, difficulty) / 2;
+		int skip = maxSkipNumber(choiceSize, difficulty) / 2;
+		if (!skipElements) {
+			skip = 2;
+		} else {
 			skip += (int) (Math.random() * skip);
 			skip = skip * 3 / 4;
+		}
+		switch (qType) {
+		case 0:
 			Connection connection = DBConnect.getConnection();
 
 			ResultSet rs = null;
@@ -211,13 +228,14 @@ public class Question {
 				while (rs.next() && actorNames.size() <= choiceSize) {
 					String name = rs.getString("a_name");
 					String dob = rs.getString("a_DOB");
-					
+
 					if (!dob.matches("(\\s)*") && !name.matches("(\\s)*")) {
 						actorNames.add(name);
 						actorDOBs.add(dob);
 					}
 				}
-				questionCache.put(getCacheKey(10, difficulty), new QuestionSetWrapper<String, String>(actorNames, actorDOBs));
+				questionCache.put(getCacheKey(10, difficulty),
+						new QuestionSetWrapper<String, String>(actorNames, actorDOBs));
 			} finally {
 				if (connection != null) {
 					connection.close();
@@ -280,15 +298,16 @@ public class Question {
 		int answer = 0, indexSelected = 0;
 		String question = null;
 		List<String> choices = new ArrayList<>(choiceLimit);
+		ArrayList<SQLGenreSet> genres = null;
+		ArrayList<String> movies = null;
+		ArrayList<Integer> years = null;
 		boolean dbConnect = false;
 		switch ((int) (Math.random() * questionTypeN)) {
 		case 0:
 			// what year is this movie released?
-			ArrayList<String> movies = null;
-			ArrayList<Integer> years = null;
 			if (!questionCache.containsKey(getCacheKey(0, difficulty)) || Math.random() <= refreshThreshold) {
 				dbConnect = true;
-				loadIndex(0, difficulty, choiceSize);
+				loadIndex(0, difficulty, choiceSize, skipElements);
 			}
 
 			movies = (ArrayList<String>) questionCache.get(getCacheKey(0, difficulty)).getPropertyList();
@@ -342,11 +361,9 @@ public class Question {
 			return new Question(question, choices, answer);
 		case 1:
 			// what set of genres best matches this movie?
-			movies = null;
-			ArrayList<SQLGenreSet> genres = null;
 			if (!questionCache.containsKey(getCacheKey(1, difficulty)) || Math.random() <= refreshThreshold) {
 				dbConnect = true;
-				loadIndex(1, difficulty, choiceSize);
+				loadIndex(1, difficulty, choiceSize, skipElements);
 			}
 			movies = (ArrayList<String>) questionCache.get(getCacheKey(1, difficulty)).getPropertyList();
 			genres = (ArrayList<SQLGenreSet>) questionCache.get(getCacheKey(1, difficulty)).getAnswerList();
@@ -382,7 +399,7 @@ public class Question {
 			years = null;
 			if (!questionCache.containsKey(getCacheKey(0, difficulty)) || Math.random() <= refreshThreshold) {
 				dbConnect = true;
-				loadIndex(0, difficulty, choiceSize);
+				loadIndex(0, difficulty, choiceSize, skipElements);
 			}
 
 			movies = (ArrayList<String>) questionCache.get(getCacheKey(0, difficulty)).getPropertyList();
@@ -428,18 +445,58 @@ public class Question {
 		case 5:
 		case 6:
 		case 7:
-		case 8:
-			// just re-generate question since incomplete code 
+			// just re-generate question since incomplete code
 			return generateQuestion(difficulty, choiceSize, skipElements);
+		case 8:
+			// which set of genres is movie X NOT about?
+			if (!questionCache.containsKey(getCacheKey(1, difficulty)) || Math.random() <= refreshThreshold) {
+				dbConnect = true;
+				loadIndex(1, difficulty, choiceSize, skipElements);
+			}
+			movies = (ArrayList<String>) questionCache.get(getCacheKey(1, difficulty)).getPropertyList();
+			genres = (ArrayList<SQLGenreSet>) questionCache.get(getCacheKey(1, difficulty)).getAnswerList();
+			if (movies.size() < resultThreshold) {
+				System.out.println("Insufficient amount of elements for question type: (" + movies.size() + ", 8)");
+				System.out.println("Re-generating question without skipping");
+				return generateQuestion(difficulty, choiceSize, false);
+			} else {
+				System.out.println("Valid result set, proceeding with computations");
+			}
+			indexSelected = (int) (Math.random() * movies.size());
+			movieSelected = movies.get(indexSelected);
+			question = "Which of these genres does not match the genre of " + movieSelected + "?";
+			genreSetSelected = genres.get(indexSelected);
+			if (genreSetSelected.size() == 0) {
+				return generateQuestion(difficulty, choiceSize, skipElements);
+				// just redo, we selected bad data on random
+			}
+			ArrayList<String> choiceCandidates = genreSetSelected.getScrambledList();
+			for (int i = 0; i < choiceLimit - 1 && i < choiceCandidates.size(); ++i) {
+				choices.add(choiceCandidates.get(i));
+			}
+			answer = (int) (Math.random() * (choices.size() + 1));
+			ArrayList<String> genresSetComplement = new ArrayList<>();
+			for (String s : ALL_GENRES) {
+				if (!genreSetSelected.contains(s)) {
+					genresSetComplement.add(s);
+				}
+			}
+			if (genresSetComplement.isEmpty()) {
+				System.out.println("Genres set complement is empty, re-generating question.");
+				System.out.println("Genres set was " + genreSetSelected.toString());
+				return generateQuestion(difficulty, choiceSize, skipElements);
+			}
+			choices.add(answer, genresSetComplement.get((int) (Math.random() * genresSetComplement.size())));
+			return new Question(question, choices, answer);
 		case 9:
-			
+
 		case 10:
 			// which actor is associated with date of birth x?
 			ArrayList<String> aName = null;
 			ArrayList<String> aDOB = null;
 			if (!questionCache.containsKey(getCacheKey(10, difficulty)) || Math.random() <= refreshThreshold) {
 				dbConnect = true;
-				loadIndex(10, difficulty, choiceSize);
+				loadIndex(10, difficulty, choiceSize, skipElements);
 			}
 			aName = (ArrayList<String>) questionCache.get(getCacheKey(10, difficulty)).getPropertyList();
 			aDOB = (ArrayList<String>) questionCache.get(getCacheKey(10, difficulty)).getAnswerList();
