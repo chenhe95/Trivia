@@ -2,6 +2,7 @@ import java.util.List;
 
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
+import com.restfb.Facebook;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.Version;
@@ -176,8 +177,38 @@ public class FacebookGUI extends javax.swing.JFrame {
     	Connection<User> myFriends = facebookClient.fetchConnection("me/friends", User.class);
     	return myFriends.getData();
     }
+    
+    /**
+     * Do not think this method would work, but worth a shot. 
+     * http://stackoverflow.com/questions/6072839/facebook-send-an-app-invitation
+     * @param facebookClient facebook client
+     * @param user the user from the getFriends
+     * @param message message for the invite
+     * @param data data for the invite
+     * @return something.
+     */
+    public static AppRequestResponse inviteRequest(FacebookClient facebookClient, User user, String message, String data){
+    	return facebookClient.publish(user.getId()+"/apprequests", AppRequestResponse.class,
+    			Parameter.with("message", message), Parameter.with("data", data));
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
+    
+    public static class AppRequestResponse extends FacebookType
+    {
+        private static final long serialVersionUID = 1L;
+
+        public AppRequestResponse()
+        {
+            // Empty
+        }
+
+        @Facebook
+        public String request;
+
+        @Facebook
+        public String to;
+    }
 }
