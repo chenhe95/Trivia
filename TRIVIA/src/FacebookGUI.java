@@ -1,3 +1,13 @@
+import java.util.List;
+
+import com.restfb.Connection;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Parameter;
+import com.restfb.Version;
+import com.restfb.types.FacebookType;
+import com.restfb.types.User;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -10,6 +20,7 @@
  */
 public class FacebookGUI extends javax.swing.JFrame {
 
+	public static FacebookClient client;
     /**
      * Creates new form FacebookGUI
      */
@@ -88,6 +99,82 @@ public class FacebookGUI extends javax.swing.JFrame {
                 new FacebookGUI().setVisible(true);
             }
         });
+    }
+
+    /**
+     * This method returns the url where we let the user log in.
+     * @return the url for user to log in.
+     */
+    public static String firstRequestToFacebookApi() {
+    	return "https://graph.facebook.com/oauth/authorize?client_id=919159891453375&"
+    			+ "redirect_uri=http://www.facebook.com/connect/login_success.html&scope=publish_stream,create_event";
+    }
+    
+    /**
+     * This method takes in the redirected URL and then return a new url where we can get the
+     * actual access token.
+     * @param redirectedUrl  the url after caling "firstRequestToFacebookAPI"
+     * @return a new URL to be processed and it's result be processed by getAccessToken
+     */
+    public static String afterRedirected(String redirectedUrl) {
+    	String match = "code=";
+    	int index = redirectedUrl.indexOf(match);
+    	index += 5;
+    	String verification_code = redirectedUrl.substring(index);
+    	StringBuilder builder = new StringBuilder();
+    	builder.append("https://graph.facebook.com/oauth/access_token?client_id=919159891453375&redirect_uri="
+    			+ "http://www.facebook.com/connect/login_success.html&"
+    			+ "client_secret=7b82a8f50ec2ba5ba547ba3829b900fa&code=").append(verification_code);
+    	return builder.toString();
+    }
+    
+    /**
+     * This method takes in the second redirected URL from "afterRedirected" and returns the access token.
+     * @param secondRespond the url after calling afterRedirected
+     * @return the access token to be saved.
+     */
+    public static String getAccessToken(String secondRespond) {
+    	String match = "access_token=";
+    	int index = secondRespond.indexOf(match);
+    	index += 13;
+    	return secondRespond.substring(index);
+    }
+    
+    /**
+     * This returns a client (we need to set up the accessToken).  
+     * This function does not support logging out and changing accessToken.
+     * @param accessToken the accessToken from getAccessToken
+     * @return Facebook client
+     */
+    public static FacebookClient getFacebookClient(String accessToken){
+    	if (client == null) {
+    		client = new DefaultFacebookClient(accessToken, "7b82a8f50ec2ba5ba547ba3829b900fa", 
+        			Version.VERSION_2_0);
+    	} 
+    	return client;
+    }
+    
+    /**
+     * This method takes in the facebookClient and the message to be posted onto the newsfeed.
+     * @param facebookClient the client
+     * @param message the message to be posted
+     * @return the id of the response of the request.
+     */
+    public static String postMessageOnWall(FacebookClient facebookClient, String message){
+    	
+    	FacebookType publishMessageResponse = facebookClient.publish("me/feed", FacebookType.class,
+    			    Parameter.with("message", message));
+    	return publishMessageResponse.getId();
+    }
+    
+    /**
+     * This function takes in the client and find all his friends.  
+     * @param facebookClient the logged in facebook client
+     * @return a list of users.
+     */
+    public static List<User> getFriends(FacebookClient facebookClient){
+    	Connection<User> myFriends = facebookClient.fetchConnection("me/friends", User.class);
+    	return myFriends.getData();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
