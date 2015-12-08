@@ -2,10 +2,21 @@
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 
 /*
@@ -22,7 +33,12 @@ public class QuestionGUI extends javax.swing.JFrame {
 	private static final long serialVersionUID = 1L;
 	private List<Question> questions;
     private MainGUI main;
-
+	MongoConnect mongo = new MongoConnect();
+	DB db;
+	DBCollection collection;
+	String username;
+	String d;
+	
     // given the index, what was the answer given?
     private HashMap<Integer, Integer> answers = new HashMap<Integer, Integer>();
     private int questionIndex = 0;
@@ -30,8 +46,30 @@ public class QuestionGUI extends javax.swing.JFrame {
     /**
      * Creates new form QuestionGUI
      */
-    public QuestionGUI(MainGUI main, List<Question> questions) {
+    public QuestionGUI(MainGUI main, List<Question> questions, String username) {
         this.main = main;
+        int difficulty = main.getDifficulty();
+        this.username = username;
+        d = "Beginner";
+        switch(difficulty) {
+        	case 0 : 
+        		d = "Beginner";
+        		break;
+        	case 1 : 
+        		d = "Easy";
+        		break;
+        	case 2:
+        		d = "Medium";
+        		break;
+        	case 3:
+        		d = "Hard";
+        		break;
+        	default:
+        		d = "Beginner";
+        		break;
+        }
+        db = mongo.getDatabase();
+        collection = db.getCollection("Users");
         this.questions = questions;
         for (int i = 0; i < questions.size(); i++) {
             answers.put(i, Integer.MAX_VALUE);
@@ -41,6 +79,24 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionIndexDisplay.setText("(0/" + questions.size() + ")");
         // assumes questions is not empty
         loadQuestion(questions.get(questionIndex));
+    }
+    
+    private JSONObject getCurrentDoc() throws ParseException {
+        db = mongo.getDatabase();
+        collection = db.getCollection("Users");
+        
+		DBObject query = new BasicDBObject();
+		query.put("Info.Username", username);
+		
+		DBObject fields = new BasicDBObject();
+		fields.put(d, 1);
+		
+		JSONParser parser = new JSONParser();
+
+		DBCursor cursor = collection.find(query, fields);
+		String json = cursor.next().toString();
+		JSONObject jsonFile = (JSONObject) parser.parse(json);
+		return jsonFile;
     }
     
     private int questionCountLockedIn() {
@@ -85,7 +141,12 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionNext.setText("Lock in Answer; Next Question");
         questionNext.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                questionNextActionPerformed(evt);
+                try {
+					questionNextActionPerformed(evt);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         });
 
@@ -99,7 +160,12 @@ public class QuestionGUI extends javax.swing.JFrame {
         submit.setText("Submit");
         submit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                submitActionPerformed(evt);
+                try {
+					submitActionPerformed(evt);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         });
 
@@ -171,7 +237,7 @@ public class QuestionGUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void submitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitActionPerformed
+    private void submitActionPerformed(java.awt.event.ActionEvent evt) throws ParseException {//GEN-FIRST:event_submitActionPerformed
         // if they click submit, they cannot go and change their questions later
         submit.setEnabled(false);
         questionNext.setEnabled(false);
@@ -183,6 +249,16 @@ public class QuestionGUI extends javax.swing.JFrame {
                 ++correct;
             }
             ++total;
+        }
+        if (main.getQuestionHandling() != 1) {
+	        JSONObject doc = getCurrentDoc();
+	        JSONObject diffStruct = (JSONObject) doc.get(d);
+	        int userCorrect = Integer.parseInt(diffStruct.get("Correct").toString());
+	        int userTotal = Integer.parseInt(diffStruct.get("Total").toString());
+	        
+	        BasicDBObject newDocument = new BasicDBObject();
+	        newDocument.append("$set", new BasicDBObject(d, new BasicDBObject("Total", userTotal + total).append("Correct", userCorrect + correct)));
+	        collection.update(new BasicDBObject().append("Info.Username", username), newDocument);
         }
         final String result = "You have answered " + ((100 * correct) / total) + " percent of questions correctly (" + correct + " / " + total + ")";
  
@@ -200,17 +276,35 @@ public class QuestionGUI extends javax.swing.JFrame {
         dispose();
     }//GEN-LAST:event_exitActionPerformed
 
-    private void questionNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_questionNextActionPerformed
+    private void questionNextActionPerformed(java.awt.event.ActionEvent evt) throws ParseException {//GEN-FIRST:event_questionNextActionPerformed
         int selectedIndex = questionSelect.getSelectedIndex();
         if (questionIndex <= questions.size() - 1) {
             Question current = questions.get(questionIndex);
             if (current.getAnswer() == selectedIndex) {
                 if (main.getQuestionHandling() == 1) {
                     displayMessage("YES!", "You have answered this question correctly.");
+        	        JSONObject doc = getCurrentDoc();
+        	        JSONObject diffStruct = (JSONObject) doc.get(d);
+        	        int userCorrect = Integer.parseInt(diffStruct.get("Correct").toString());
+        	        int userTotal = Integer.parseInt(diffStruct.get("Total").toString());
+        	        
+        	        BasicDBObject newDocument = new BasicDBObject();
+        	        newDocument.append("$set", new BasicDBObject(d, new BasicDBObject("Total", userTotal + 1).append("Correct", userCorrect + 1)));
+        	        collection.update(new BasicDBObject().append("Info.Username", username), newDocument);
+
                 }
             } else {
                 if (main.getQuestionHandling() == 1) {
                     displayMessage("NO!", "You have answered this question incorrectly. The correct answer is " + current.getChoices().get(current.getAnswer()));
+        	        JSONObject doc = getCurrentDoc();
+        	        JSONObject diffStruct = (JSONObject) doc.get(d);
+        	        int userCorrect = Integer.parseInt(diffStruct.get("Correct").toString());
+        	        int userTotal = Integer.parseInt(diffStruct.get("Total").toString());
+        	        
+        	        BasicDBObject newDocument = new BasicDBObject();
+        	        newDocument.append("$set", new BasicDBObject(d, new BasicDBObject("Total", userTotal + 1).append("Correct", userCorrect + 1)));
+        	        collection.update(new BasicDBObject().append("Info.Username", username), newDocument);
+
                 }
             }
             answers.put(questionIndex, selectedIndex);
