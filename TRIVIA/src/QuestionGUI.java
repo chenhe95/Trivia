@@ -291,20 +291,10 @@ public class QuestionGUI extends javax.swing.JFrame {
         	        BasicDBObject newDocument = new BasicDBObject();
         	        newDocument.append("$set", new BasicDBObject(d, new BasicDBObject("Total", userTotal + 1).append("Correct", userCorrect + 1)));
         	        collection.update(new BasicDBObject().append("Info.Username", username), newDocument);
-
                 }
             } else {
                 if (main.getQuestionHandling() == 1) {
                     displayMessage("NO!", "You have answered this question incorrectly. The correct answer is " + current.getChoices().get(current.getAnswer()));
-        	        JSONObject doc = getCurrentDoc();
-        	        JSONObject diffStruct = (JSONObject) doc.get(d);
-        	        int userCorrect = Integer.parseInt(diffStruct.get("Correct").toString());
-        	        int userTotal = Integer.parseInt(diffStruct.get("Total").toString());
-        	        
-        	        BasicDBObject newDocument = new BasicDBObject();
-        	        newDocument.append("$set", new BasicDBObject(d, new BasicDBObject("Total", userTotal + 1).append("Correct", userCorrect + 1)));
-        	        collection.update(new BasicDBObject().append("Info.Username", username), newDocument);
-
                 }
             }
             answers.put(questionIndex, selectedIndex);

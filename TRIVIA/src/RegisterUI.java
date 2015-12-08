@@ -48,10 +48,10 @@ public class RegisterUI extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         Usernamefield = new javax.swing.JTextField();
-        Passwordfield = new javax.swing.JTextField();
+        Passwordfield = new javax.swing.JPasswordField();
         jButton1 = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
-        Repeat = new javax.swing.JTextField();
+        Repeat = new javax.swing.JPasswordField();
         jLabel1 = new javax.swing.JLabel();
 
         jLabel2.setText("jLabel2");
@@ -163,8 +163,11 @@ public class RegisterUI extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
     	String username = Usernamefield.getText();
-    	String pw1 = Passwordfield.getText();
-    	String pw2 = Repeat.getText();
+    	char[] pw1 = Passwordfield.getPassword();
+    	String pw1s = new String(pw1);
+    	char[] pw2 = Repeat.getPassword();
+    	String pw2s = new String(pw2);
+    	
     	
     	if (usernames.contains(username)) {
         	JOptionPane.showMessageDialog(null, "Username already exists!", "Failed",JOptionPane.ERROR_MESSAGE);
@@ -181,7 +184,7 @@ public class RegisterUI extends javax.swing.JFrame {
     			.append("Easy", new BasicDBObject("Total", 0).append("Correct", 0))
     			.append("Medium", new BasicDBObject("Total", 0).append("Correct", 0))
     			.append("Hard", new BasicDBObject("Total", 0).append("Correct", 0))
-    			.append("Last", new BasicDBObject("Question", "").append("Answer", ""));
+    			.append("Last", new BasicDBObject("Question", "").append("Answer", "").append("Correct", ""));
     		col.insert(doc);
 
         	JOptionPane.showMessageDialog(null, "Registration Successful!", "Success!",JOptionPane.INFORMATION_MESSAGE);
@@ -227,8 +230,8 @@ public class RegisterUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField Passwordfield;
-    private javax.swing.JTextField Repeat;
+    private javax.swing.JPasswordField Passwordfield;
+    private javax.swing.JPasswordField Repeat;
     private javax.swing.JTextField Usernamefield;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

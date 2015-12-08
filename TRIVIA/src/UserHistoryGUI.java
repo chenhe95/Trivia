@@ -361,7 +361,7 @@ public class UserHistoryGUI extends javax.swing.JFrame {
 			totalAnswered += beginnerTotal;
 			int beginnerCorrect = Integer.parseInt(beginner.get("Correct").toString());
 			totalCorrect += beginnerCorrect;
-			totalScore += totalCorrect * 10;
+			totalScore += beginnerCorrect * 10;
 			float beginnerRate = 0.0f;
 			if (beginnerTotal != 0) {
 				beginnerRate = (float) beginnerCorrect / beginnerTotal;
@@ -373,7 +373,7 @@ public class UserHistoryGUI extends javax.swing.JFrame {
 			int easyCorrect = Integer.parseInt(easy.get("Correct").toString());
 			totalAnswered += easyTotal;
 			totalCorrect += easyCorrect;
-			totalScore += totalCorrect * 20;
+			totalScore += easyCorrect * 20;
 
 			float easyRate = 0.0f;
 			if (easyTotal != 0) {
@@ -387,10 +387,10 @@ public class UserHistoryGUI extends javax.swing.JFrame {
 			
 			totalAnswered += medTotal;
 			totalCorrect += medCorrect;
-			totalScore += totalCorrect * 30;
+			totalScore += medCorrect * 30;
 			
 			float medRate = 0.0f;
-			if (easyTotal != 0) {
+			if (medTotal != 0) {
 				medRate = (float) medCorrect / medTotal;
 			}
 			
@@ -401,7 +401,7 @@ public class UserHistoryGUI extends javax.swing.JFrame {
 			
 			totalAnswered += hardTotal;
 			totalCorrect += hardCorrect;
-			totalScore += totalCorrect * 50;
+			totalScore += hardCorrect * 50;
 			
 			float hardRate = 0.0f;
 			if (hardTotal != 0) {
