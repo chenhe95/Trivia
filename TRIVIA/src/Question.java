@@ -125,7 +125,8 @@ public class Question {
 
 			ResultSet rs = null;
 			try {
-				String qry = "SELECT * from (SELECT @row := @row +1 AS rownum, name, rating FROM (SELECT @row := 0) r, movie.movies offset "
+				String qry = "SELECT * from (SELECT @row := @row +1 AS rownum, name, "
+						+ "rating FROM (SELECT @row := 0) r, movie.movies offset "
 						+ ") ranked WHERE rownum % " + skip + " = 1 AND rating > " + getRating(difficulty);
 
 				Statement s = connection.createStatement();
@@ -206,6 +207,35 @@ public class Question {
 			break;
 		case 2:
 		case 3:
+			skip = 10 + (int) (Math.random() * 180000);
+			connection = DBConnect.getConnection();
+			LinkedHashMap<String, SQLGenreSet> map3 = new LinkedHashMap<>();
+			try {
+				String qry = "SELECT a.name as actor, m.name as movie FROM movie.actors a, movies.movie m "
+						+ "INNER JOIN movies.acts act ON m.mid = acts.mid and acts.aid = a.aid "
+						+ "WHERE m.mid IN (SELECT mid from (SELECT @row := @row +1 AS rownum, mid as mid"
+						+ "rating FROM (SELECT @row := 0) r, movie.movies offset "
+						+ ") ranked WHERE rownum % " + skip + " = 1 AND rating > " + getRating(difficulty) + ")";
+				Statement s3 = connection.createStatement();
+				System.out.println("Executing: " + qry);
+				rs = s3.executeQuery(qry);
+				while (rs.next() && map3.size() <= choiceSize) {
+					String actor = rs.getString("actor");
+					String movie = rs.getString("movie");
+					if (!map3.containsKey(actor)){
+						map3.put(actor, new SQLGenreSet());
+					}
+					SQLGenreSet set = map3.get(actor);
+					set.addGenre(movie);
+				}
+				questionCache.put(getCacheKey(3, difficulty), new QuestionSetWrapper<String, SQLGenreSet>(
+						new ArrayList<String>(map3.keySet()), new ArrayList<SQLGenreSet>(map3.values())));
+			} finally {
+				if (connection != null) {
+					connection.close();
+				}
+			}
+			break;
 		case 4:
 		case 5:
 		case 6:
@@ -217,7 +247,9 @@ public class Question {
 			connection = DBConnect.getConnection();
 			ArrayList<Integer> idList2 = new ArrayList<>(choiceSize * 2);
 			try {
-				String qry = "(SELECT * from (SELECT @row := @row +1 as rownum, aid as aid, mid as mid FROM (SELECT @row := 0) r, movie.acts) ranked WHERE rownum % 1 = 0 order by mid desc limit "
+				String qry = "(SELECT * from (SELECT @row := @row +1 as rownum, aid as aid, "
+						+ "mid as mid FROM (SELECT @row := 0) r, movie.acts) "
+						+ "ranked WHERE rownum % 1 = 0 order by mid desc limit "
 						+ skip + ", 200000)";
 				Statement s = connection.createStatement();
 				System.out.println("Executing: " + qry);
@@ -541,6 +573,49 @@ public class Question {
 			question = question + ") was made the earliest?";
 			return new Question(question, choices, answer);
 		case 3:
+			// which movie has actor X acted in
+			if (!cacheContainsKey(3, difficulty) || Math.random() <= refreshThreshold) {
+				loadIndex(3, difficulty, choiceSize, skipElements);
+			}
+			// Instead of movies and genres, they are actors and movies but that's good enough
+			movies = (ArrayList<String>) questionCache.get(getCacheKey(3, difficulty)).getPropertyList();
+			genres = (ArrayList<SQLGenreSet>) questionCache.get(getCacheKey(3, difficulty)).getAnswerList();
+
+			if (movies.size() < resultThreshold) {
+				System.out.println("Insufficient amount of elements for question type: (" + movies.size() + ", 1)");
+				System.out.println("Re-generating question without skipping");
+				return generateQuestion(difficulty, choiceSize, false);
+			} else {
+				System.out.println("Valid result set, proceeding with computations");
+			}
+			indexSelected = (int) (Math.random() * movies.size());
+			movieSelected = movies.get(indexSelected);
+			question = "What movie has " + movieSelected + " acted in?";
+			genreSetSelected = genres.get(indexSelected);
+			HashSet<String> chosen3 = new HashSet<>();
+			choices.add(answer, genreSetSelected.getList().remove(0));
+			
+			for (int i = 0; i < choiceLimit - 1; ++i) {
+				int index = (int) (Math.random() * movies.size());
+				SQLGenreSet genreSet = genres.get(index);
+				if (index != indexSelected) {
+					if (genreSet.getList().size() == 0) {
+						--i;
+						continue;
+					}
+					String movanswer = genreSet.getList().remove(0);
+					if (!genreSetSelected.contains(movanswer) && !chosen3.contains(movanswer)){
+						choices.add(movanswer);
+						chosen3.add(movanswer);
+					} else {
+						--i;
+					}
+				} else if (Math.random() > 0.10) {
+					--i;
+				}
+			}
+			answer = (int) (Math.random() * (choices.size() + 1));
+			return new Question(question, choices, answer);
 		case 4:
 		case 5:
 		case 6:
