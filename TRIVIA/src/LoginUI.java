@@ -55,7 +55,7 @@ public class LoginUI extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jTextField2 = new javax.swing.JPasswordField();
+        jTextField2 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
@@ -235,13 +235,11 @@ public class LoginUI extends javax.swing.JFrame {
 		}
 		return userpw;
     }
- 
     
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) throws ParseException {                                         
         HashMap<String, String> userpw = getUserInfo();
         String inputuser = jTextField1.getText();
-        char[] inputpw = jTextField2.getPassword();
-        String pw = new String(inputpw);
+        String inputpw = jTextField2.getText();
         
         //wrong username
         if (!userpw.containsKey(inputuser)) {
@@ -249,7 +247,7 @@ public class LoginUI extends javax.swing.JFrame {
         }
         
         // wrong password
-        else if (!userpw.get(inputuser).equals(pw)) {
+        else if (!userpw.get(inputuser).equals(inputpw)) {
         	JOptionPane.showMessageDialog(null, "Incorrect Password", "Failed", JOptionPane.ERROR_MESSAGE);
         }
         
@@ -316,6 +314,6 @@ public class LoginUI extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JPasswordField jTextField2;
+    private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
 }
