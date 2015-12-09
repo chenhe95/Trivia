@@ -594,6 +594,7 @@ public class Question {
 			genreSetSelected = genres.get(indexSelected);
 			HashSet<String> chosen3 = new HashSet<>();
 			String answer3 = genreSetSelected.getList().remove(0);
+			genreSetSelected.addGenre(answer3);
 			chosen3.add(answer3);
 			
 			for (int i = 0; i < choiceLimit - 1; ++i) {
