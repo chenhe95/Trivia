@@ -1,10 +1,13 @@
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
 import org.json.simple.parser.ParseException;
 
 /*
@@ -27,7 +30,8 @@ public class MainGUI extends javax.swing.JFrame {
     private int difficulty = 0;
     private OptionsGUI opt = new OptionsGUI(this);
     private String username;
-    
+    UserHistoryGUI stats = null;
+
     /**
      * Creates new form MainGUI
      */
@@ -46,50 +50,23 @@ public class MainGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
-        bkgPanel = new javax.swing.JPanel();
-        triviaLabel = new javax.swing.JLabel();
-        facebookConnect = new javax.swing.JButton();
-        play = new javax.swing.JButton();
-        options = new javax.swing.JButton();
-        user = new javax.swing.JButton();
+        bkgPanel = bkgPanel = new BKGPanel();
 
         jButton1.setText("jButton1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        triviaLabel.setFont(new java.awt.Font("Comic Sans MS", 2, 24)); // NOI18N
-        triviaLabel.setText("<html><center>T r i v i a</center></html>");
-
-        facebookConnect.setText("Connect to Facebook");
-        facebookConnect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                facebookConnectActionPerformed(evt);
+        bkgPanel.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                bkgPanelMouseMoved(evt);
             }
         });
-
-        play.setText("Play");
-        play.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                playActionPerformed(evt);
+        bkgPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bkgPanelMouseClicked(evt);
             }
-        });
-
-        options.setText("Options");
-        options.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                optionsActionPerformed(evt);
-            }
-        });
-
-        user.setText("Check Stats");
-        user.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                try {
-					userActionPerformed(evt);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                bkgPanelMousePressed(evt);
             }
         });
 
@@ -97,90 +74,67 @@ public class MainGUI extends javax.swing.JFrame {
         bkgPanel.setLayout(bkgPanelLayout);
         bkgPanelLayout.setHorizontalGroup(
             bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(bkgPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(facebookConnect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(play, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(options, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(triviaLabel)
-                    .addComponent(user, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 13, Short.MAX_VALUE))
-             /*   .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(bkgPanelLayout.createSequentialGroup()
-                        .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(options, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(triviaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 524, Short.MAX_VALUE)
-                        .addComponent(facebookConnect))
-                    .addGroup(bkgPanelLayout.createSequentialGroup()
-                        .addComponent(play, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap()) */
+            .addGap(0, 656, Short.MAX_VALUE)
         );
         bkgPanelLayout.setVerticalGroup(
             bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(bkgPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(triviaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 268, Short.MAX_VALUE)
-                .addComponent(play)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(facebookConnect)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(options)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(user)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-               /* .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(options)
-                    .addComponent(facebookConnect))
-                .addContainerGap()) */
+            .addGap(0, 454, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(bkgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-
-       //     .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-
+            .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void optionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optionsActionPerformed
-        opt.setVisible(true);
-    }//GEN-LAST:event_optionsActionPerformed
-
-    private void playActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_playActionPerformed
-
-        final MainGUI main = this;
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                QuestionGUI gui = new QuestionGUI(main, Question.generateQuestionSet(main.getDifficulty(), 20), username);
-                gui.setVisible(true);
-            }
-        });
-    }//GEN-LAST:event_playActionPerformed
-
-    private void facebookConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_facebookConnectActionPerformed
+    private void bkgPanelMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bkgPanelMouseMoved
         // TODO add your handling code here:
-    }//GEN-LAST:event_facebookConnectActionPerformed
+    }//GEN-LAST:event_bkgPanelMouseMoved
 
-    private void userActionPerformed(java.awt.event.ActionEvent evt) throws ParseException {//GEN-FIRST:event_userActionPerformed
-        UserHistoryGUI stats = new UserHistoryGUI(username);
-        stats.setVisible(true);
-    }//GEN-LAST:event_userActionPerformed
+    private void bkgPanelMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bkgPanelMousePressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bkgPanelMousePressed
+
+    private void bkgPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bkgPanelMouseClicked
+        for (CButton c : ((BKGPanel) bkgPanel).getButtons()) {
+            if (c.isContained(evt.getX(), evt.getY())) {
+                if (c.text.equals("Play")) {
+                    final MainGUI main = this;
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            QuestionGUI gui = new QuestionGUI(main, Question.generateQuestionSet(main.getDifficulty(), 20), username);
+                            gui.setVisible(true);
+                        }
+                    });
+                } else if (c.text.equals("Check Stats")) {
+                    try {
+                        if (stats != null && stats.isValid()) {
+                            return;
+                        }
+                        stats = new UserHistoryGUI(username);
+                        stats.setVisible(true);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                } else if (c.text.equals("Options")) {
+                    opt.setVisible(true);
+                } else if (c.text.equals("Facebook Connect")) {
+
+                }
+            }
+        }
+    }//GEN-LAST:event_bkgPanelMouseClicked
 
     public boolean isModifiable() {
         return modifiable;
@@ -212,66 +166,224 @@ public class MainGUI extends javax.swing.JFrame {
             }
         });
     }
-    
+
     private static class CButton {
-        
-        private static final int HORIZONTAL_MARGIN = 4;
-        private static final int VERTICAL_MARGIN = 4;
-        
+
+        private final int HORIZONTAL_MARGIN = 4;
+        private final int VERTICAL_MARGIN = 4;
+
         private int x, y, w, h;
         String text, icon;
         Color color = Color.ORANGE;
-        
-        public CButton(int x, int y, int w, int h, String text, String icon) {
+        BufferedImage image = null;
+        JPanel jp;
+        Font font;
+
+        public CButton(JPanel jp, int x, int y, int w, int h, String text, String icon) {
+            this.jp = jp;
             this.x = x;
             this.y = y;
             this.w = w;
             this.h = h;
             this.text = text;
             this.icon = icon;
+            if (icon != null) {
+                try {
+                    image = ImageIO.read(new File(icon));
+                } catch (IOException io) {
+
+                }
+            }
         }
-        
-        public CButton(int x, int y, int w, int h, String text) {
-            this(x, y, w, h, text, null);
+
+        public boolean isContained(int px, int py) {
+            //image.getWidth() + 2 * HORIZONTAL_MARGIN
+
+            return px >= x && px <= x + w + (image != null ? image.getWidth() + 2 * HORIZONTAL_MARGIN : 0) && py >= y && py <= y + h;
         }
-        
-        public CButton(int x, int y, int w, int h) {
-            this(x, y, w, h, "    ", null);
+
+        public CButton(JPanel jp, int x, int y, int w, int h, String text) {
+            this(jp, x, y, w, h, text, null);
         }
-        
-        public void drawButton(Graphics2D g) {
+
+        public CButton(JPanel jp, int x, int y, int w, int h) {
+            this(jp, x, y, w, h, "    ", null);
+        }
+
+        public CButton(JPanel jp, int x, int y, String icon) {
+            this(jp, x, y, 0, 0, "", icon);
+        }
+
+        public void resizeImage(int nw, int nh) {
+            if (image != null) {
+                image = toBufferedImage(image.getScaledInstance(nw, nh, Image.SCALE_SMOOTH));
+            }
+        }
+
+        private final float MIX_FACTOR = 0.5f;
+
+        private static BufferedImage toBufferedImage(Image img) {
+            if (img instanceof BufferedImage) {
+                return (BufferedImage) img;
+            }
+
+            // Create a buffered image with transparency
+            BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+            // Draw the image on to the buffered image
+            Graphics2D bGr = bimage.createGraphics();
+            bGr.drawImage(img, 0, 0, null);
+            bGr.dispose();
+
+            // Return the buffered image
+            return bimage;
+        }
+
+        private Color taintColor(Color base, Color influence) {
+            return new Color(
+                    base.getRed() + ((int) ((influence.getRed() - base.getRed()) * MIX_FACTOR)),
+                    base.getBlue() + ((int) ((influence.getGreen() - base.getGreen()) * MIX_FACTOR)),
+                    base.getBlue() + ((int) ((influence.getBlue() - base.getBlue()) * MIX_FACTOR)));
+        }
+
+        public void drawButton(Graphics2D g, boolean mouseInBox) {
+
             int textw = 0;
             int texth = 0;
+            int atextw = 0;
+            if (font == null) {
+                g.setFont(Font.getFont("Calibri"));
+                font = g.getFont().deriveFont(22);
+            }
+            g.setFont(font);
             FontMetrics fontMetric = g.getFontMetrics();
             for (char c : text.toCharArray()) {
                 textw += fontMetric.charWidth(c);
             }
+            atextw = textw;
             texth = fontMetric.getHeight();
             textw = Math.max(textw + 2 * HORIZONTAL_MARGIN, w);
             texth = Math.max(texth + 2 * VERTICAL_MARGIN, h);
+            if (image != null) {
+                textw += image.getWidth() + 2 * HORIZONTAL_MARGIN;
+                texth = Math.max(image.getHeight() + 2 * VERTICAL_MARGIN, texth);
+            }
+            Color fill = new Color(0, 0, 0, 130);
+            if (mouseInBox) {
+                fill = taintColor(fill, new Color(0, 255, 0, 50));
+            }
+            g.setColor(fill);
+            g.fillRect(x, y, textw, texth);
             g.setColor(color);
             g.drawRect(x, y, textw, texth);
-           // g.drawString(text, x + HORIZONTAL_, TOP_ALIGNMENT);
+            h = texth;
+            g.drawString(text, x + HORIZONTAL_MARGIN, y + VERTICAL_MARGIN + 18);
+            if (image != null) {
+                g.drawImage(image, x + textw - image.getWidth() - HORIZONTAL_MARGIN, y + VERTICAL_MARGIN - 1, jp);
+            }
         }
     }
-    
+
     private static class BKGPanel extends JPanel {
-        
+
+        public BKGPanel() {
+            super();
+            play = new CButton(this, 30, 30, 120, 0, "Play", "img/play.png");
+            checkStats = new CButton(this, 30, 75, 120, 0, "Check Stats", "img/leaderboard.png");
+            options = new CButton(this, 30, 120, 120, 0, "Options", "img/option.png");
+            fbConnect = new CButton(this, 30, 165, 120, 0, "Facebook Connect", "img/fblogo.jpg");
+            play.resizeImage(30, 30);
+            checkStats.resizeImage(30, 30);
+            options.resizeImage(30, 30);
+            fbConnect.resizeImage(30, 30);
+
+            Thread update = new Thread(new Runnable() {
+                @Override
+                public synchronized void run() {
+                    while (true) {
+                        try {
+                            repaint();
+                            wait(25);
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                    }
+                }
+            });
+            update.setDaemon(true);
+            update.start();
+
+            try {
+                logo = ImageIO.read(new File("img/logo.png"));
+            } catch (IOException e) {
+
+            }
+        }
+
+        public CButton[] getButtons() {
+            return new CButton[]{play, checkStats, options, fbConnect};
+        }
+
+        BufferedImage logo = null;
+
+        private final int WAIT_THRESHOLD = 50;
+        private final int[] orangeM = {0, 0, 100, 100};
+        private Paint orangePaint = null;
+        private long startMS = -1;
+
+        private final float MIX_FACTOR = 0.5f;
+
+        CButton play, checkStats, options, fbConnect;
+
+        private void drawColorfulBox(Graphics2D g, int x, int y, int w, int h) {
+            Color previousColor = g.getColor();
+            Paint previousPaint = g.getPaint();
+            g.setPaint(orangePaint);
+            g.fillRect(x, y, w, h);
+            g.setColor(Color.ORANGE);
+            g.drawRect(x, y, w, h);
+            g.setPaint(previousPaint);
+            g.setColor(previousColor);
+        }
+
+        private Color taintColor(Color base, Color influence) {
+            return new Color(
+                    base.getRed() + ((int) ((influence.getRed() - base.getRed()) * MIX_FACTOR)),
+                    base.getBlue() + ((int) ((influence.getGreen() - base.getGreen()) * MIX_FACTOR)),
+                    base.getBlue() + ((int) ((influence.getBlue() - base.getBlue()) * MIX_FACTOR)));
+        }
+
         @Override
         public void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
             Graphics2D g = (Graphics2D) graphics;
-            
+
+            if (startMS == -1) {
+                startMS = System.currentTimeMillis();
+            } else if (System.currentTimeMillis() - startMS >= WAIT_THRESHOLD) {
+                for (int i = 0; i < orangeM.length; i++) {
+                    orangeM[i] += 2;
+                    orangeM[i] %= 200;
+                }
+                startMS = System.currentTimeMillis();
+            }
+            orangePaint = new GradientPaint(orangeM[0], orangeM[1], Color.RED,
+                    orangeM[2], orangeM[3], new Color(120, 0, 0), true);
+
+            drawColorfulBox(g, 0, 0, 656 * 3 / 2, 454 * 3 / 2);
+            if (logo != null) {
+                g.drawImage(logo, 10, 216, this);
+            }
+            Point pm = getMousePosition();
+            play.drawButton(g, pm == null ? false : play.isContained(pm.x, pm.y));
+            checkStats.drawButton(g, pm == null ? false : checkStats.isContained(pm.x, pm.y));
+            options.drawButton(g, pm == null ? false : options.isContained(pm.x, pm.y));
+            fbConnect.drawButton(g, pm == null ? false : fbConnect.isContained(pm.x, pm.y));
         }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bkgPanel;
-    private javax.swing.JButton facebookConnect;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton options;
-    private javax.swing.JButton play;
-    private javax.swing.JLabel triviaLabel;
-    private javax.swing.JButton user;
     // End of variables declaration//GEN-END:variables
 }
