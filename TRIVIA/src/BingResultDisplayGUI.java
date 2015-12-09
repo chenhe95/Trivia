@@ -220,7 +220,7 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    } 
+    }
     
         /**
      * Converts a given Image into a BufferedImage
