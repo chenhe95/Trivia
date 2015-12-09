@@ -1,4 +1,5 @@
 
+import com.google.code.bing.search.schema.web.WebResult;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -29,7 +30,8 @@ public class QuestionGUI extends javax.swing.JFrame {
     private static final long serialVersionUID = 1L;
     private List<Question> questions;
     private MainGUI main;
-
+    private int bingHelpUses = 3;
+    
     // given the index, what was the answer given?
     private HashMap<Integer, Integer> answers = new HashMap<Integer, Integer>();
     private int questionIndex = 0;
@@ -79,8 +81,11 @@ public class QuestionGUI extends javax.swing.JFrame {
         submit = new javax.swing.JButton();
         exit = new javax.swing.JButton();
         questionIndexDisplay = new javax.swing.JLabel();
+        bingHelp = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("TRIVIA!!!!!!!!!!!!!!!!!!!!");
+        setResizable(false);
 
         bkgPanel.setBackground(new java.awt.Color(204, 0, 0));
 
@@ -125,6 +130,13 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionIndexDisplay.setForeground(new java.awt.Color(204, 204, 255));
         questionIndexDisplay.setText("        ");
 
+        bingHelp.setText("Get Help from BING: 3 Left");
+        bingHelp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bingHelpActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout bkgPanelLayout = new javax.swing.GroupLayout(bkgPanel);
         bkgPanel.setLayout(bkgPanelLayout);
         bkgPanelLayout.setHorizontalGroup(
@@ -140,7 +152,8 @@ public class QuestionGUI extends javax.swing.JFrame {
                             .addComponent(questionNext, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
                             .addComponent(questionPrevious, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(submit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(exit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(exit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(bingHelp, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(bkgPanelLayout.createSequentialGroup()
                         .addComponent(questionIndexDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -161,13 +174,14 @@ public class QuestionGUI extends javax.swing.JFrame {
                         .addComponent(exit)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(submit)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(bingHelp))
                     .addGroup(bkgPanelLayout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(questionIndexDisplay)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -276,6 +290,22 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionIndexDisplay.setText("(" + questionCountLockedIn() + "/" + questions.size() + ")");
     }//GEN-LAST:event_questionPreviousActionPerformed
 
+    private void bingHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bingHelpActionPerformed
+        if (bingHelpUses == 0) {
+            displayMessage("You used them all!", "You have already used all your bing helps!");
+        } else {
+            List<WebResult> wr = BingBackend.getQueryResult(questions.get(questionIndex).getQuestion());
+            if (wr.isEmpty()) {
+                displayMessage("No results found!", "BING has nothing for this question, help uses will not be deducted, try another question.");
+            } else {
+                --bingHelpUses;
+            }
+            BingResultDisplayGUI bing = new BingResultDisplayGUI(wr);
+            bing.setVisible(true);
+            bingHelp.setText("Get Help from BING: " + bingHelpUses + " Left");
+        }
+    }//GEN-LAST:event_bingHelpActionPerformed
+
     private void displayMessage(String title, String message) {
         JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
     }
@@ -312,6 +342,7 @@ public class QuestionGUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton bingHelp;
     private javax.swing.JPanel bkgPanel;
     private javax.swing.JButton exit;
     private javax.swing.JScrollPane jScrollPane1;

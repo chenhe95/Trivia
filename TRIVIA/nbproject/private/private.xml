@@ -3,15 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/Test.java</file>
-            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/ResultsGUI.java</file>
-            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/Query.java</file>
-            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/DBConnect.java</file>
-            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/SQLGenreSet.java</file>
+            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/FacebookGUI.java</file>
+            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/BingResultDisplayGUI.java</file>
             <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/OptionsGUI.java</file>
-            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/MainGUI.java</file>
             <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/QuestionGUI.java</file>
-            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/Question.java</file>
+            <file>file:/C:/Users/He/Desktop/School/CIS%20550/Trivia/Trivia/TRIVIA/src/BingBackend.java</file>
         </group>
     </open-files>
 </project-private>
