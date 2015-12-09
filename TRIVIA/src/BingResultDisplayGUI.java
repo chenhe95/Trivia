@@ -15,25 +15,39 @@ import net.billylieurance.azuresearch.AzureSearchWebResult;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author He
  */
 public class BingResultDisplayGUI extends javax.swing.JFrame {
 
-    private List<AzureSearchWebResult> results = null;
+    static String replace = "(<.*>|\\n)";
+    
+    private List<GoogleResults.Result> results = null;
     int iter = 0;
+
     /**
      * Creates new form BingResultDisplayGUI
      */
-    public BingResultDisplayGUI(List<AzureSearchWebResult> wr) {
+    public BingResultDisplayGUI(List<GoogleResults.Result> wr) {
         results = wr;
         initComponents();
         if (wr.isEmpty()) {
             nextResult.setEnabled(false);
             previousResult.setEnabled(false);
             titleText.setText("No results available for search!");
+        } else {
+            GoogleResults.Result res = results.get(0);
+            if (iter == results.size() - 1) {
+                nextResult.setEnabled(false);
+            }
+            titleText.setText(res.getTitle());
+            String descText = "URL: " + res.getUrl() + System.lineSeparator();
+            if (res.content != null) {
+                descText += "Preview: " + res.content.replaceAll("<.*>", "");
+            }
+
+            descriptionURL.setText(descText.replaceAll("<.*>", ""));
         }
     }
 
@@ -57,7 +71,7 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
         exitButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("BING");
+        setTitle("GOOGLE");
 
         bingLogo.setBackground(new java.awt.Color(204, 255, 255));
 
@@ -69,7 +83,7 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
         );
         bingLogoLayout.setVerticalGroup(
             bingLogoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
+            .addGap(0, 239, Short.MAX_VALUE)
         );
 
         titleText.setText("      ");
@@ -129,7 +143,7 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(titleText, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -182,50 +196,65 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
             return;
         } else {
             previousResult.setEnabled(false);
-            AzureSearchWebResult wr = results.get(++iter);
+            GoogleResults.Result wr = results.get(++iter);
+            if (iter == results.size() - 1) {
+                nextResult.setEnabled(false);
+            }
             titleText.setText(wr.getTitle());
-            String descText = "URL: " + wr.getUrl() + System.lineSeparator() + "Description: " + wr.getDescription();
-            descriptionURL.setText(descText);
+            String descText = "URL: " + wr.getUrl() + System.lineSeparator();
+            if (wr.content != null) {
+                descText += "Preview: " + wr.content.replaceAll("<.*>", "");
+            }
+
+            descriptionURL.setText(descText.replaceAll("<.*>", ""));
         }
     }
-    
+
     private void loadPreviousResult() {
         if (iter == 0) {
             previousResult.setEnabled(false);
             return;
         } else {
             nextResult.setEnabled(true);
-            AzureSearchWebResult wr = results.get(--iter);
-            titleText.setText(wr.getTitle());
-            String descText = "URL: " + wr.getUrl() + System.lineSeparator() + "Description: " + wr.getDescription();
+            GoogleResults.Result wr = results.get(--iter);
+            if (iter == 0) {
+                previousResult.setEnabled(false);
+            }
+            titleText.setText(wr.getTitle().replaceAll("<.*>", ""));
+            String descText = "URL: " + wr.getUrl() + System.lineSeparator();
+            if (wr.content != null) {
+                descText += "Preview: " + wr.content.replaceAll("<.*>", "");
+            }
             descriptionURL.setText(descText);
         }
     }
-    
+
     private static class BKGPanel extends JPanel {
-        
+
         @Override
         public void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
             Graphics2D g = (Graphics2D) graphics;
-            g.drawImage(bkgImage, 0, 0, 754, 444, this);
+            g.drawImage(bkgImage, 0, 0, 790, 280, this);
         }
     }
-    
+
     static BufferedImage bkgImage = null;
+
     static {
         try {
             bkgImage = ImageIO.read(new File("img/bing.png"));
-            bkgImage = toBufferedImage(bkgImage.getScaledInstance(760, 198, Image.SCALE_SMOOTH));
+            bkgImage = toBufferedImage(bkgImage.getScaledInstance(790, 280, Image.SCALE_SMOOTH));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
-        /**
+
+    /**
      * Converts a given Image into a BufferedImage
-     * 
-     * CREDIT https://code.google.com/p/game-engine-for-java/source/browse/src/com/gej/util/ImageTool.java#31
+     *
+     * CREDIT
+     * https://code.google.com/p/game-engine-for-java/source/browse/src/com/gej/util/ImageTool.java#31
      *
      * @param img The Image to be converted
      * @return The converted BufferedImage
@@ -246,7 +275,7 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
         // Return the buffered image
         return bimage;
     }
-    
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bingLogo;

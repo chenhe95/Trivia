@@ -31,7 +31,7 @@ public class QuestionGUI extends javax.swing.JFrame {
     private List<Question> questions;
     private MainGUI main;
     private int bingHelpUses = 3;
-    
+
     // given the index, what was the answer given?
     private HashMap<Integer, Integer> answers = new HashMap<Integer, Integer>();
     private int questionIndex = 0;
@@ -200,8 +200,9 @@ public class QuestionGUI extends javax.swing.JFrame {
 
     /**
      * Converts a given Image into a BufferedImage
-     * 
-     * CREDIT https://code.google.com/p/game-engine-for-java/source/browse/src/com/gej/util/ImageTool.java#31
+     *
+     * CREDIT
+     * https://code.google.com/p/game-engine-for-java/source/browse/src/com/gej/util/ImageTool.java#31
      *
      * @param img The Image to be converted
      * @return The converted BufferedImage
@@ -294,8 +295,14 @@ public class QuestionGUI extends javax.swing.JFrame {
         if (bingHelpUses == 0) {
             displayMessage("You used them all!", "You have already used all your bing helps!");
         } else {
-            List<AzureSearchWebResult> wr = BingBackend.getQueryResult(questions.get(questionIndex).getQuestion(), 15);
-            if (wr.isEmpty()) {
+            List<GoogleResults.Result> wr = null;
+            try {
+                wr = GoogleBackend.getQueryResult(questions.get(questionIndex).getQuestion());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+      
+            if (wr == null || wr.isEmpty()) {
                 displayMessage("No results found!", "BING has nothing for this question, help uses will not be deducted, try another question.");
             } else {
                 --bingHelpUses;
@@ -319,10 +326,9 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionText.setText(q.getQuestion());
         questionSelect.setSelectedIndex(0);
     }
-    
-    
+
     private static class BKGPanel extends JPanel {
-        
+
         @Override
         public void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
@@ -330,8 +336,9 @@ public class QuestionGUI extends javax.swing.JFrame {
             g.drawImage(bkgImage, 0, 0, 754, 444, this);
         }
     }
-    
+
     static BufferedImage bkgImage = null;
+
     static {
         try {
             bkgImage = ImageIO.read(new File("img/curtain.jpg"));
