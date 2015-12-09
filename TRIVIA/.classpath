@@ -3,8 +3,24 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="jdbc_driver.jar"/>
 	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/mongodb-driver-3.0.4.jar"/>
-	<classpathentry kind="lib" path="bing-search-java-sdk.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/restfb-1.17.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/azure-bing-search-java-0.12.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/commons-codec-1.9.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/fluent-hc-4.5.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/gson-2.3.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/gson-2.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/httpclient-4.5.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/httpclient-cache-4.5.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/httpclient-win-4.5.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/httpcore-4.4.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/httpmime-4.5.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/jdbc_driver.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/jna-4.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/jna-platform-4.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/json-20151123.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/mongo-java-driver-3.1.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

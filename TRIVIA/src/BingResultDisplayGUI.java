@@ -21,7 +21,7 @@ import net.billylieurance.azuresearch.AzureSearchWebResult;
  */
 public class BingResultDisplayGUI extends javax.swing.JFrame {
 
-    static String replace = "(<.*>|\\n)";
+    static String replace = "(<.*>|\n|" + System.lineSeparator() + ")";
     
     private List<GoogleResults.Result> results = null;
     int iter = 0;
@@ -41,13 +41,13 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
             if (iter == results.size() - 1) {
                 nextResult.setEnabled(false);
             }
-            titleText.setText(res.getTitle());
+            titleText.setText(res.getTitle().replaceAll(replace, ""));
             String descText = "URL: " + res.getUrl() + System.lineSeparator();
             if (res.content != null) {
-                descText += "Preview: " + res.content.replaceAll("<.*>", "");
+                descText += "Preview: " + res.content.replaceAll(replace, "");
             }
 
-            descriptionURL.setText(descText.replaceAll("<.*>", ""));
+            descriptionURL.setText(descText.replaceAll(replace, ""));
         }
     }
 
@@ -200,13 +200,13 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
             if (iter == results.size() - 1) {
                 nextResult.setEnabled(false);
             }
-            titleText.setText(wr.getTitle());
+            titleText.setText(wr.getTitle().replaceAll(replace, ""));
             String descText = "URL: " + wr.getUrl() + System.lineSeparator();
             if (wr.content != null) {
-                descText += "Preview: " + wr.content.replaceAll("<.*>", "");
+                descText += "Preview: " + wr.content.replaceAll(replace, "");
             }
 
-            descriptionURL.setText(descText.replaceAll("<.*>", ""));
+            descriptionURL.setText(descText.replaceAll(replace, ""));
         }
     }
 
@@ -220,12 +220,12 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
             if (iter == 0) {
                 previousResult.setEnabled(false);
             }
-            titleText.setText(wr.getTitle().replaceAll("<.*>", ""));
+            titleText.setText(wr.getTitle().replaceAll(replace, ""));
             String descText = "URL: " + wr.getUrl() + System.lineSeparator();
             if (wr.content != null) {
-                descText += "Preview: " + wr.content.replaceAll("<.*>", "");
+                descText += "Preview: " + wr.content.replaceAll(replace, "");
             }
-            descriptionURL.setText(descText);
+            descriptionURL.setText(descText.replaceAll(replace, ""));
         }
     }
 

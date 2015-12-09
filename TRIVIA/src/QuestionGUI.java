@@ -174,12 +174,7 @@ public class QuestionGUI extends javax.swing.JFrame {
         submit.setText("Submit");
         submit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                try {
-					submitActionPerformed(evt);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+                submitActionPerformed(evt);
             }
         });
 
@@ -193,7 +188,7 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionIndexDisplay.setForeground(new java.awt.Color(204, 204, 255));
         questionIndexDisplay.setText("        ");
 
-        bingHelp.setText("Get Help from BING: 3 Left");
+        bingHelp.setText("Get Help from the G: 3 Left");
         bingHelp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 bingHelpActionPerformed(evt);
@@ -301,6 +296,7 @@ public class QuestionGUI extends javax.swing.JFrame {
             ++total;
         }
         if (main.getQuestionHandling() != 1) {
+            try {
 	        JSONObject doc = getCurrentDoc();
 	        JSONObject diffStruct = (JSONObject) doc.get(d);
 	        int userCorrect = Integer.parseInt(diffStruct.get("Correct").toString());
@@ -309,6 +305,9 @@ public class QuestionGUI extends javax.swing.JFrame {
 	        BasicDBObject newDocument = new BasicDBObject();
 	        newDocument.append("$set", new BasicDBObject(d, new BasicDBObject("Total", userTotal + total).append("Correct", userCorrect + correct)));
 	        collection.update(new BasicDBObject().append("Info.Username", username), newDocument);
+            } catch(ParseException pe) {
+                pe.printStackTrace();
+            }
         }
         final String result = "You have answered " + ((100 * correct) / total) + " percent of questions correctly (" + correct + " / " + total + ")";
 
@@ -374,7 +373,7 @@ public class QuestionGUI extends javax.swing.JFrame {
 
     private void bingHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bingHelpActionPerformed
         if (bingHelpUses == 0) {
-            displayMessage("You used them all!", "You have already used all your bing helps!");
+            displayMessage("You used them all!", "You have already used all your G helps!");
         } else {
             List<GoogleResults.Result> wr = null;
             try {
@@ -384,13 +383,13 @@ public class QuestionGUI extends javax.swing.JFrame {
             }
       
             if (wr == null || wr.isEmpty()) {
-                displayMessage("No results found!", "BING has nothing for this question, help uses will not be deducted, try another question.");
+                displayMessage("No results found!", "Google has nothing for this question, help uses will not be deducted, try another question.");
             } else {
                 --bingHelpUses;
             }
             BingResultDisplayGUI bing = new BingResultDisplayGUI(wr);
             bing.setVisible(true);
-            bingHelp.setText("Get Help from BING: " + bingHelpUses + " Left");
+            bingHelp.setText("Get Help from the G: " + bingHelpUses + " Left");
         }
     }//GEN-LAST:event_bingHelpActionPerformed
 

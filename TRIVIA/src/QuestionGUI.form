@@ -182,7 +182,7 @@
         </Component>
         <Component class="javax.swing.JButton" name="bingHelp">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Get Help from BING: 3 Left"/>
+            <Property name="text" type="java.lang.String" value="Get Help from the G: 3 Left"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bingHelpActionPerformed"/>
