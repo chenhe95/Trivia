@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.json.simple.parser.ParseException;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -24,12 +26,14 @@ public class MainGUI extends javax.swing.JFrame {
     private int questionHandling = 0;
     private int difficulty = 0;
     private OptionsGUI opt = new OptionsGUI(this);
-
+    private String username;
+    
     /**
      * Creates new form MainGUI
      */
-    public MainGUI() {
+    public MainGUI(String username) {
         initComponents();
+        this.username = username;
     }
 
     /**
@@ -41,11 +45,15 @@ public class MainGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        bkgPanel = bkgPanel = new BKGPanel();
+        jButton1 = new javax.swing.JButton();
+        bkgPanel = new javax.swing.JPanel();
         triviaLabel = new javax.swing.JLabel();
         facebookConnect = new javax.swing.JButton();
         play = new javax.swing.JButton();
         options = new javax.swing.JButton();
+        user = new javax.swing.JButton();
+
+        jButton1.setText("jButton1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -73,13 +81,32 @@ public class MainGUI extends javax.swing.JFrame {
             }
         });
 
+        user.setText("Check Stats");
+        user.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                try {
+					userActionPerformed(evt);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }
+        });
+
         javax.swing.GroupLayout bkgPanelLayout = new javax.swing.GroupLayout(bkgPanel);
         bkgPanel.setLayout(bkgPanelLayout);
         bkgPanelLayout.setHorizontalGroup(
             bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(bkgPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(facebookConnect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(play, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(options, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(triviaLabel)
+                    .addComponent(user, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 13, Short.MAX_VALUE))
+             /*   .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(bkgPanelLayout.createSequentialGroup()
                         .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(options, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -89,7 +116,7 @@ public class MainGUI extends javax.swing.JFrame {
                     .addGroup(bkgPanelLayout.createSequentialGroup()
                         .addComponent(play, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                .addContainerGap()) */
         );
         bkgPanelLayout.setVerticalGroup(
             bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -99,10 +126,16 @@ public class MainGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 268, Short.MAX_VALUE)
                 .addComponent(play)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(facebookConnect)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(options)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(user)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+               /* .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(options)
                     .addComponent(facebookConnect))
-                .addContainerGap())
+                .addContainerGap()) */
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -113,7 +146,12 @@ public class MainGUI extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+
+       //     .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+
         );
 
         pack();
@@ -129,7 +167,7 @@ public class MainGUI extends javax.swing.JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                QuestionGUI gui = new QuestionGUI(main, Question.generateQuestionSet(main.getDifficulty(), 20));
+                QuestionGUI gui = new QuestionGUI(main, Question.generateQuestionSet(main.getDifficulty(), 20), username);
                 gui.setVisible(true);
             }
         });
@@ -138,6 +176,11 @@ public class MainGUI extends javax.swing.JFrame {
     private void facebookConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_facebookConnectActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_facebookConnectActionPerformed
+
+    private void userActionPerformed(java.awt.event.ActionEvent evt) throws ParseException {//GEN-FIRST:event_userActionPerformed
+        UserHistoryGUI stats = new UserHistoryGUI(username);
+        stats.setVisible(true);
+    }//GEN-LAST:event_userActionPerformed
 
     public boolean isModifiable() {
         return modifiable;
@@ -164,7 +207,7 @@ public class MainGUI extends javax.swing.JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MainGUI gui = new MainGUI();
+                MainGUI gui = new MainGUI("");
                 gui.setVisible(true);
             }
         });
@@ -225,8 +268,10 @@ public class MainGUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bkgPanel;
     private javax.swing.JButton facebookConnect;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton options;
     private javax.swing.JButton play;
     private javax.swing.JLabel triviaLabel;
+    private javax.swing.JButton user;
     // End of variables declaration//GEN-END:variables
 }

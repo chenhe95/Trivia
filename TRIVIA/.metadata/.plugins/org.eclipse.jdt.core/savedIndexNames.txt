@@ -1,0 +1,1 @@
+INDEX VERSION 1.127+C:\Users\JayJung\Documents\GitHub\Trivia\Trivia\TRIVIA\.metadata\.plugins\org.eclipse.jdt.core
