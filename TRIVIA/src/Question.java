@@ -593,7 +593,8 @@ public class Question {
 			question = "What movie has " + movieSelected + " acted in?";
 			genreSetSelected = genres.get(indexSelected);
 			HashSet<String> chosen3 = new HashSet<>();
-			choices.add(answer, genreSetSelected.getList().remove(0));
+			String answer3 = genreSetSelected.getList().remove(0);
+			chosen3.add(answer3);
 			
 			for (int i = 0; i < choiceLimit - 1; ++i) {
 				int index = (int) (Math.random() * movies.size());
@@ -615,8 +616,50 @@ public class Question {
 				}
 			}
 			answer = (int) (Math.random() * (choices.size() + 1));
+			choices.add(answer, answer3);
 			return new Question(question, choices, answer);
 		case 4:
+			// which movie has actor X not acted in
+			if (!cacheContainsKey(3, difficulty) || Math.random() <= refreshThreshold) {
+				loadIndex(3, difficulty, choiceSize, skipElements);
+			}
+			// Instead of movies and genres, they are actors and movies but that's good enough
+			movies = (ArrayList<String>) questionCache.get(getCacheKey(3, difficulty)).getPropertyList();
+			genres = (ArrayList<SQLGenreSet>) questionCache.get(getCacheKey(3, difficulty)).getAnswerList();
+
+			if (movies.size() < resultThreshold) {
+				System.out.println("Insufficient amount of elements for question type: (" + movies.size() + ", 1)");
+				System.out.println("Re-generating question without skipping");
+				return generateQuestion(difficulty, choiceSize, false);
+			} else {
+				System.out.println("Valid result set, proceeding with computations");
+			}
+			indexSelected = (int) (Math.random() * movies.size());
+			movieSelected = movies.get(indexSelected);
+			question = "What movie has " + movieSelected + " NOT acted in?";
+			genreSetSelected = genres.get(indexSelected);
+			HashSet<String> chosen4 = new HashSet<>();
+			for (int i = 0; i < choiceLimit - 1 && i < genreSetSelected.getList().size(); ++i){
+				chosen4.add(genreSetSelected.getList().get(i));
+			}
+			String answer4 = null;
+			while (answer4 == null){
+				int index = (int) (Math.random() * movies.size());
+				SQLGenreSet genreSet = genres.get(index);
+				if (index != indexSelected) {
+					if (genreSet.getList().size() == 0) {
+						continue;
+					}
+					String movanswer = genreSet.getList().remove(0);
+					if (!genreSetSelected.contains(movanswer) && !chosen4.contains(movanswer)){
+						choices.add(movanswer);
+						answer4 = movanswer;
+					}
+				} 
+			}
+			answer = (int) (Math.random() * (choices.size() + 1));
+			choices.add(answer, answer4);
+			return new Question(question, choices, answer);
 		case 5:
 		case 6:
 			// just re-generate question since incomplete code
