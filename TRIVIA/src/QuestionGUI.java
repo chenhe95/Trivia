@@ -421,7 +421,7 @@ public class QuestionGUI extends javax.swing.JFrame {
 
     static {
         try {
-            bkgImage = ImageIO.read(new File("img/curtain.jpg"));
+            bkgImage = ImageIO.read(ResourceLoader.load("curtain.jpg"));
             bkgImage = toBufferedImage(bkgImage.getScaledInstance(754, 444, Image.SCALE_SMOOTH));
         } catch (IOException e) {
             e.printStackTrace();

@@ -189,7 +189,7 @@ public class MainGUI extends javax.swing.JFrame {
             this.icon = icon;
             if (icon != null) {
                 try {
-                    image = ImageIO.read(new File(icon));
+                    image = ImageIO.read(ResourceLoader.load(icon));
                 } catch (IOException io) {
 
                 }
@@ -288,10 +288,10 @@ public class MainGUI extends javax.swing.JFrame {
 
         public BKGPanel() {
             super();
-            play = new CButton(this, 30, 30, 120, 0, "Play", "img/play.png");
-            checkStats = new CButton(this, 30, 75, 120, 0, "Check Stats", "img/leaderboard.png");
-            options = new CButton(this, 30, 120, 120, 0, "Options", "img/option.png");
-            fbConnect = new CButton(this, 30, 165, 120, 0, "Facebook Connect", "img/fblogo.jpg");
+            play = new CButton(this, 30, 30, 120, 0, "Play", "play.png");
+            checkStats = new CButton(this, 30, 75, 120, 0, "Check Stats", "leaderboard.png");
+            options = new CButton(this, 30, 120, 120, 0, "Options", "option.png");
+            fbConnect = new CButton(this, 30, 165, 120, 0, "Facebook Connect", "fblogo.jpg");
             play.resizeImage(30, 30);
             checkStats.resizeImage(30, 30);
             options.resizeImage(30, 30);
@@ -314,7 +314,7 @@ public class MainGUI extends javax.swing.JFrame {
             update.start();
 
             try {
-                logo = ImageIO.read(new File("img/logo.png"));
+                logo = ImageIO.read(ResourceLoader.load("logo.png"));
             } catch (IOException e) {
 
             }

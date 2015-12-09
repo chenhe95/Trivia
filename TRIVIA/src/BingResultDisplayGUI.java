@@ -243,7 +243,7 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
 
     static {
         try {
-            bkgImage = ImageIO.read(new File("img/bing.png"));
+            bkgImage = ImageIO.read(ResourceLoader.load("bing.png"));
             bkgImage = toBufferedImage(bkgImage.getScaledInstance(790, 280, Image.SCALE_SMOOTH));
         } catch (IOException e) {
             e.printStackTrace();

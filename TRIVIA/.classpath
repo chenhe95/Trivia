@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="img"/>
 	<classpathentry kind="lib" path="jdbc_driver.jar"/>
 	<classpathentry kind="lib" path="C:/Users/He/Desktop/School/CIS 550/Trivia/Trivia/TRIVIA/mongodb-driver-3.0.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
