@@ -1,5 +1,4 @@
 
-import com.google.code.bing.search.schema.web.WebResult;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -14,6 +13,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import net.billylieurance.azuresearch.AzureSearchWebResult;
 
 
 /*
@@ -294,7 +294,7 @@ public class QuestionGUI extends javax.swing.JFrame {
         if (bingHelpUses == 0) {
             displayMessage("You used them all!", "You have already used all your bing helps!");
         } else {
-            List<WebResult> wr = BingBackend.getQueryResult(questions.get(questionIndex).getQuestion());
+            List<AzureSearchWebResult> wr = BingBackend.getQueryResult(questions.get(questionIndex).getQuestion(), 15);
             if (wr.isEmpty()) {
                 displayMessage("No results found!", "BING has nothing for this question, help uses will not be deducted, try another question.");
             } else {

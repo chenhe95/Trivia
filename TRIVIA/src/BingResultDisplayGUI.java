@@ -1,5 +1,4 @@
 
-import com.google.code.bing.search.schema.web.WebResult;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -9,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+import net.billylieurance.azuresearch.AzureSearchWebResult;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -22,12 +22,12 @@ import javax.swing.JPanel;
  */
 public class BingResultDisplayGUI extends javax.swing.JFrame {
 
-    private List<WebResult> results = null;
+    private List<AzureSearchWebResult> results = null;
     int iter = 0;
     /**
      * Creates new form BingResultDisplayGUI
      */
-    public BingResultDisplayGUI(List<WebResult> wr) {
+    public BingResultDisplayGUI(List<AzureSearchWebResult> wr) {
         results = wr;
         initComponents();
         if (wr.isEmpty()) {
@@ -182,7 +182,7 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
             return;
         } else {
             previousResult.setEnabled(false);
-            WebResult wr = results.get(++iter);
+            AzureSearchWebResult wr = results.get(++iter);
             titleText.setText(wr.getTitle());
             String descText = "URL: " + wr.getUrl() + System.lineSeparator() + "Description: " + wr.getDescription();
             descriptionURL.setText(descText);
@@ -195,7 +195,7 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
             return;
         } else {
             nextResult.setEnabled(true);
-            WebResult wr = results.get(--iter);
+            AzureSearchWebResult wr = results.get(--iter);
             titleText.setText(wr.getTitle());
             String descText = "URL: " + wr.getUrl() + System.lineSeparator() + "Description: " + wr.getDescription();
             descriptionURL.setText(descText);
