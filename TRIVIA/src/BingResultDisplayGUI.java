@@ -42,12 +42,12 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
                 nextResult.setEnabled(false);
             }
             titleText.setText(res.getTitle().replaceAll(replace, ""));
-            String descText = "URL: " + res.getUrl() + System.lineSeparator();
+            String descText = "URL: " + res.getUrl() + System.lineSeparator() + '\n';
             if (res.content != null) {
-                descText += "Preview: " + res.content.replaceAll(replace, "");
+                descText += "\nPreview: " + res.content.replaceAll(replace, "");
             }
 
-            descriptionURL.setText(descText.replaceAll(replace, ""));
+            descriptionURL.setText(descText);
         }
     }
 
@@ -195,18 +195,18 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
             nextResult.setEnabled(false);
             return;
         } else {
-            previousResult.setEnabled(false);
+            previousResult.setEnabled(true);
             GoogleResults.Result wr = results.get(++iter);
             if (iter == results.size() - 1) {
                 nextResult.setEnabled(false);
             }
             titleText.setText(wr.getTitle().replaceAll(replace, ""));
-            String descText = "URL: " + wr.getUrl() + System.lineSeparator();
+            String descText = "URL: " + wr.getUrl() + System.lineSeparator() + '\n';
             if (wr.content != null) {
-                descText += "Preview: " + wr.content.replaceAll(replace, "");
+                descText += "\nPreview: " + wr.content.replaceAll(replace, "");
             }
 
-            descriptionURL.setText(descText.replaceAll(replace, ""));
+            descriptionURL.setText(descText);
         }
     }
 
@@ -221,11 +221,11 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
                 previousResult.setEnabled(false);
             }
             titleText.setText(wr.getTitle().replaceAll(replace, ""));
-            String descText = "URL: " + wr.getUrl() + System.lineSeparator();
+            String descText = "URL: " + wr.getUrl() + System.lineSeparator() + '\n';
             if (wr.content != null) {
-                descText += "Preview: " + wr.content.replaceAll(replace, "");
+                descText += "\nPreview: " + wr.content.replaceAll(replace, "");
             }
-            descriptionURL.setText(descText.replaceAll(replace, ""));
+            descriptionURL.setText(descText);
         }
     }
 

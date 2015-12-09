@@ -40,7 +40,7 @@ public class OptionsGUI extends javax.swing.JFrame {
         apply = new javax.swing.JButton();
         cancel = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
 
         jLabel1.setText("Select difficulty:");
 
