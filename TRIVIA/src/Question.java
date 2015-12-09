@@ -207,6 +207,7 @@ public class Question {
 			break;
 		case 2:
 		case 3:
+                    /*
 			skip = 10 + (int) (Math.random() * 180000);
 			connection = DBConnect.getConnection();
 			LinkedHashMap<String, SQLGenreSet> map3 = new LinkedHashMap<>();
@@ -235,7 +236,7 @@ public class Question {
 					connection.close();
 				}
 			}
-			break;
+			break; */
 		case 4:
 		case 5:
 		case 6:
@@ -573,7 +574,7 @@ public class Question {
 			question = question + ") was made the earliest?";
 			return new Question(question, choices, answer);
 		case 3:
-			// which movie has actor X acted in
+			/*// which movie has actor X acted in
 			if (!cacheContainsKey(3, difficulty) || Math.random() <= refreshThreshold) {
 				loadIndex(3, difficulty, choiceSize, skipElements);
 			}
@@ -618,9 +619,9 @@ public class Question {
 			}
 			answer = (int) (Math.random() * (choices.size() + 1));
 			choices.add(answer, answer3);
-			return new Question(question, choices, answer);
+			return new Question(question, choices, answer); */
 		case 4:
-			// which movie has actor X not acted in
+			/*// which movie has actor X not acted in
 			if (!cacheContainsKey(3, difficulty) || Math.random() <= refreshThreshold) {
 				loadIndex(3, difficulty, choiceSize, skipElements);
 			}
@@ -660,7 +661,7 @@ public class Question {
 			}
 			answer = (int) (Math.random() * (choices.size() + 1));
 			choices.add(answer, answer4);
-			return new Question(question, choices, answer);
+			return new Question(question, choices, answer);*/
 		case 5:
 		case 6:
 			// just re-generate question since incomplete code
