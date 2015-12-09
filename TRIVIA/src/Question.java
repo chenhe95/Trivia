@@ -102,12 +102,16 @@ public class Question {
 		return questionList;
 	}
 
+	private static boolean cacheContainsKey(int key, int difficulty) {
+		return questionCache.containsKey(getCacheKey(key, difficulty));
+	}
+
 	private static void loadIndex(int qType, int difficulty, int choiceSize, boolean skipElements) throws SQLException {
-		int offset = (int) (Math.random() * 3);
 		ArrayList<String> actorNames = new ArrayList<>();
 		ArrayList<String> actorDOBs = new ArrayList<>();
 		ArrayList<String> movies = new ArrayList<>();
 		ArrayList<Integer> years = new ArrayList<>();
+		ArrayList<Integer> idList = new ArrayList<>();
 		int skip = maxSkipNumber(choiceSize, difficulty) / 2;
 		if (!skipElements) {
 			skip = 2;
@@ -206,10 +210,100 @@ public class Question {
 		case 5:
 		case 6:
 		case 7:
+			if (!cacheContainsKey(9, difficulty)) {
+				loadIndex(9, difficulty, choiceSize, skipElements);
+			}
+			skip = 10 + (int) (Math.random() * 180000);
+			connection = DBConnect.getConnection();
+			ArrayList<Integer> idList2 = new ArrayList<>(choiceSize * 2);
+			try {
+				String qry = "(SELECT * from (SELECT @row := @row +1 as rownum, aid as aid, mid as mid FROM (SELECT @row := 0) r, movie.acts) ranked WHERE rownum % 1 = 0 order by mid desc limit "
+						+ skip + ", 200000)";
+				Statement s = connection.createStatement();
+				System.out.println("Executing: " + qry);
+				rs = s.executeQuery(qry);
+
+				// rs.next() is actually very slow so we would
+				// like to minimize the time by caching the results
+				while (rs.next() && actorNames.size() <= choiceSize * 2) {
+					int mid = rs.getInt("mid");
+					int aid = rs.getInt("aid");
+					idList.add(mid);
+					idList2.add(aid);
+				}
+				questionCache.put(getCacheKey(7, difficulty),
+						new QuestionSetWrapper<Integer, Integer>(idList, idList2));
+			} finally {
+				if (connection != null) {
+					connection.close();
+				}
+			}
+			break;
 		case 8:
+			// we'll use 8 as a way to load random actors
+			skip = Question.maxSkipNumberActorOverall(choiceSize) / 2;
+			skip += (int) (Math.random() * skip);
+			skip = skip * 3 / 4;
+			connection = DBConnect.getConnection();
+
+			try {
+				String qry = "(SELECT * from (SELECT @row := @row +1 as rownum, name as a_name, aid as a_aid FROM (SELECT @row := 0) r, movie.actors) ranked WHERE rownum % "
+						+ skip + " = 0)";
+				Statement s = connection.createStatement();
+				System.out.println("Executing: " + qry);
+				rs = s.executeQuery(qry);
+
+				// rs.next() is actually very slow so we would
+				// like to minimize the time by caching the results
+				while (rs.next() && actorNames.size() <= choiceSize) {
+					String name = rs.getString("a_name");
+					int aid = rs.getInt("a_aid");
+					if (!name.matches("(\\s)*")) {
+						actorNames.add(name);
+						idList.add(aid);
+					}
+				}
+				questionCache.put(getCacheKey(8, difficulty),
+						new QuestionSetWrapper<Integer, String>(idList, actorNames));
+			} finally {
+				if (connection != null) {
+					connection.close();
+				}
+			}
+			break;
 		case 9:
+			// we'll use 9 as a way to load random movies
+			skip = maxSkipNumber(choiceSize, difficulty) / 2;
+			skip += (int) (Math.random() * skip);
+			skip = skip * 3 / 4;
+			connection = DBConnect.getConnection();
+
+			try {
+				String qry = "(SELECT * from (SELECT @row := @row +1 as rownum, name as m_name, mid as mid FROM (SELECT @row := 0) r, movie.movies) ranked WHERE rownum % "
+						+ skip + " = 0)";
+				Statement s = connection.createStatement();
+				System.out.println("Executing: " + qry);
+				rs = s.executeQuery(qry);
+
+				// rs.next() is actually very slow so we would
+				// like to minimize the time by caching the results
+				while (rs.next() && actorNames.size() <= choiceSize) {
+					String name = rs.getString("m_name");
+					int mid = rs.getInt("mid");
+					if (!name.matches("(\\s)*")) {
+						movies.add(name);
+						idList.add(mid);
+					}
+				}
+				questionCache.put(getCacheKey(9, difficulty), new QuestionSetWrapper<Integer, String>(idList, movies));
+			} finally {
+				if (connection != null) {
+					connection.close();
+				}
+			}
+			break;
 		case 10:
-			skip = maxSkipNumberActor(choiceSize) / 2;
+			skip = maxSkipNumberActorWithBirthday(choiceSize) / 2;
 			skip += (int) (Math.random() * skip);
 			skip = skip * 3 / 4;
 			connection = DBConnect.getConnection();
@@ -272,8 +366,12 @@ public class Question {
 		}
 	}
 
-	private static int maxSkipNumberActor(int choiceSize) {
+	private static int maxSkipNumberActorWithBirthday(int choiceSize) {
 		return 38726 / choiceSize;
+	}
+
+	private static int maxSkipNumberActorOverall(int choiceSize) {
+		return 184144 / choiceSize;
 	}
 
 	private static int getCacheKey(int qType, int difficulty) {
@@ -301,6 +399,8 @@ public class Question {
 		ArrayList<SQLGenreSet> genres = null;
 		ArrayList<String> movies = null;
 		ArrayList<Integer> years = null;
+		ArrayList<Integer> aids = null;
+		ArrayList<Integer> mids = null;
 		boolean dbConnect = false;
 		switch ((int) (Math.random() * questionTypeN)) {
 		case 0:
@@ -444,9 +544,74 @@ public class Question {
 		case 4:
 		case 5:
 		case 6:
-		case 7:
 			// just re-generate question since incomplete code
 			return generateQuestion(difficulty, choiceSize, skipElements);
+		case 7:
+			// has actor X acted in same movie as actor Y?
+			if (!cacheContainsKey(7, difficulty) || Math.random() <= refreshThreshold) {
+				loadIndex(7, difficulty, choiceSize, skipElements);
+			}
+			mids = (ArrayList<Integer>) questionCache.get(getCacheKey(7, difficulty)).getPropertyList();
+			aids = (ArrayList<Integer>) questionCache.get(getCacheKey(7, difficulty)).getAnswerList();
+			int actor1 = -1, actor2 = -1;
+			for (int i = 0; i < choiceSize * 2 && (actor1 == -1 || actor2 == -1); i++) {
+				int randomVal = aids.get((int) (Math.random() * mids.size()));
+				if (actor1 == -1) {
+					actor1 = randomVal;
+				} else if (randomVal == actor1) {
+					continue;
+				} else {
+					actor2 = randomVal;
+					break;
+				}
+			}
+			Connection conn = DBConnect.getConnection();
+			HashSet<Integer> actor1MovieSet = new HashSet<>();
+			HashSet<Integer> actor2MovieSet = new HashSet<>();
+			String a1Name = "", a2Name = "";
+			try {
+				Statement statement = conn.createStatement();
+				ResultSet rs = statement.executeQuery("select mid as mid from movie.acts where aid = " + actor1);
+				while (rs.next()) {
+					int movieID = rs.getInt("mid");
+					actor1MovieSet.add(movieID);
+				}
+				statement = conn.createStatement();
+				rs = statement.executeQuery("select mid as mid from movie.acts where aid = " + actor1);
+				while (rs.next()) {
+					int movieID = rs.getInt("mid");
+					actor2MovieSet.add(movieID);
+				}
+				statement = conn.createStatement();
+				rs = statement.executeQuery("select name as name from movie.actors where aid = " + actor1);
+				if (rs.next()) {
+					a1Name = rs.getString("name");
+				} else {
+					System.out.println("actor id " + actor1 + " does not have a name");
+				}
+				statement = conn.createStatement();
+				rs = statement.executeQuery("select name as name from movie.actors where aid = " + actor2);
+				if (rs.next()) {
+					a2Name = rs.getString("name");
+				} else {
+					System.out.println("actor id " + actor2 + " does not have a name");
+				}
+			} finally {
+				if (conn != null) {
+					conn.close();
+				}
+			}
+			answer = 1;
+			for (int mid : actor1MovieSet) {
+				if (actor2MovieSet.contains(mid)) {
+					answer = 0;
+					break;
+				}
+			}
+			question = "Have " + a1Name + " and " + a2Name + " acted in the same movie?";
+			choices.add("True");
+			choices.add("False");
+			return new Question(question, choices, answer);
 		case 8:
 			// which set of genres is movie X NOT about?
 			if (!questionCache.containsKey(getCacheKey(1, difficulty)) || Math.random() <= refreshThreshold) {

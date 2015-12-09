@@ -1,12 +1,19 @@
 
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import net.billylieurance.azuresearch.AzureSearchWebResult;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,15 +37,16 @@ import com.mongodb.DBObject;
  */
 public class QuestionGUI extends javax.swing.JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private List<Question> questions;
+    private static final long serialVersionUID = 1L;
+    private List<Question> questions;
     private MainGUI main;
 	MongoConnect mongo = new MongoConnect();
 	DB db;
 	DBCollection collection;
 	String username;
 	String d;
-	
+    private int bingHelpUses = 3;
+
     // given the index, what was the answer given?
     private HashMap<Integer, Integer> answers = new HashMap<Integer, Integer>();
     private int questionIndex = 0;
@@ -80,7 +88,6 @@ public class QuestionGUI extends javax.swing.JFrame {
         // assumes questions is not empty
         loadQuestion(questions.get(questionIndex));
     }
-    
     private JSONObject getCurrentDoc() throws ParseException {
         db = mongo.getDatabase();
         collection = db.getCollection("Users");
@@ -98,7 +105,6 @@ public class QuestionGUI extends javax.swing.JFrame {
 		JSONObject jsonFile = (JSONObject) parser.parse(json);
 		return jsonFile;
     }
-    
     private int questionCountLockedIn() {
         int counter = 0;
         for (int v : answers.values()) {
@@ -118,9 +124,9 @@ public class QuestionGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        bkgPanel = new javax.swing.JPanel();
+        bkgPanel = bkgPanel = new BKGPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        questionSelect = new JList<String>();
+        questionSelect = new javax.swing.JList();
         jScrollPane2 = new javax.swing.JScrollPane();
         questionText = new javax.swing.JTextArea();
         questionNext = new javax.swing.JButton();
@@ -128,14 +134,22 @@ public class QuestionGUI extends javax.swing.JFrame {
         submit = new javax.swing.JButton();
         exit = new javax.swing.JButton();
         questionIndexDisplay = new javax.swing.JLabel();
+        bingHelp = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("TRIVIA!!!!!!!!!!!!!!!!!!!!");
+        setResizable(false);
+
+        bkgPanel.setBackground(new java.awt.Color(204, 0, 0));
 
         jScrollPane1.setViewportView(questionSelect);
 
         questionText.setEditable(false);
         questionText.setColumns(20);
+        questionText.setFont(new java.awt.Font("Times New Roman", 1, 18)); // NOI18N
+        questionText.setLineWrap(true);
         questionText.setRows(5);
+        questionText.setWrapStyleWord(true);
         jScrollPane2.setViewportView(questionText);
 
         questionNext.setText("Lock in Answer; Next Question");
@@ -176,7 +190,15 @@ public class QuestionGUI extends javax.swing.JFrame {
             }
         });
 
+        questionIndexDisplay.setForeground(new java.awt.Color(204, 204, 255));
         questionIndexDisplay.setText("        ");
+
+        bingHelp.setText("Get Help from BING: 3 Left");
+        bingHelp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bingHelpActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout bkgPanelLayout = new javax.swing.GroupLayout(bkgPanel);
         bkgPanel.setLayout(bkgPanelLayout);
@@ -190,10 +212,11 @@ public class QuestionGUI extends javax.swing.JFrame {
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 502, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(questionNext, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(questionPrevious, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
+                            .addComponent(questionNext, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
+                            .addComponent(questionPrevious, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(submit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(exit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(exit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(bingHelp, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(bkgPanelLayout.createSequentialGroup()
                         .addComponent(questionIndexDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -202,7 +225,7 @@ public class QuestionGUI extends javax.swing.JFrame {
         bkgPanelLayout.setVerticalGroup(
             bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(bkgPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(7, 7, 7)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(bkgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(bkgPanelLayout.createSequentialGroup()
@@ -214,13 +237,14 @@ public class QuestionGUI extends javax.swing.JFrame {
                         .addComponent(exit)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(submit)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(bingHelp))
                     .addGroup(bkgPanelLayout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(questionIndexDisplay)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -233,11 +257,37 @@ public class QuestionGUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(bkgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-        questionText.setLineWrap(true);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void submitActionPerformed(java.awt.event.ActionEvent evt) throws ParseException {//GEN-FIRST:event_submitActionPerformed
+    /**
+     * Converts a given Image into a BufferedImage
+     *
+     * CREDIT
+     * https://code.google.com/p/game-engine-for-java/source/browse/src/com/gej/util/ImageTool.java#31
+     *
+     * @param img The Image to be converted
+     * @return The converted BufferedImage
+     */
+    private static BufferedImage toBufferedImage(Image img) {
+        if (img instanceof BufferedImage) {
+            return (BufferedImage) img;
+        }
+
+        // Create a buffered image with transparency
+        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+        // Draw the image on to the buffered image
+        Graphics2D bGr = bimage.createGraphics();
+        bGr.drawImage(img, 0, 0, null);
+        bGr.dispose();
+
+        // Return the buffered image
+        return bimage;
+    }
+
+    private void submitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitActionPerformed
         // if they click submit, they cannot go and change their questions later
         submit.setEnabled(false);
         questionNext.setEnabled(false);
@@ -261,7 +311,7 @@ public class QuestionGUI extends javax.swing.JFrame {
 	        collection.update(new BasicDBObject().append("Info.Username", username), newDocument);
         }
         final String result = "You have answered " + ((100 * correct) / total) + " percent of questions correctly (" + correct + " / " + total + ")";
- 
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -322,6 +372,28 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionIndexDisplay.setText("(" + questionCountLockedIn() + "/" + questions.size() + ")");
     }//GEN-LAST:event_questionPreviousActionPerformed
 
+    private void bingHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bingHelpActionPerformed
+        if (bingHelpUses == 0) {
+            displayMessage("You used them all!", "You have already used all your bing helps!");
+        } else {
+            List<GoogleResults.Result> wr = null;
+            try {
+                wr = GoogleBackend.getQueryResult(questions.get(questionIndex).getQuestion());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+      
+            if (wr == null || wr.isEmpty()) {
+                displayMessage("No results found!", "BING has nothing for this question, help uses will not be deducted, try another question.");
+            } else {
+                --bingHelpUses;
+            }
+            BingResultDisplayGUI bing = new BingResultDisplayGUI(wr);
+            bing.setVisible(true);
+            bingHelp.setText("Get Help from BING: " + bingHelpUses + " Left");
+        }
+    }//GEN-LAST:event_bingHelpActionPerformed
+
     private void displayMessage(String title, String message) {
         JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
     }
@@ -336,7 +408,29 @@ public class QuestionGUI extends javax.swing.JFrame {
         questionSelect.setSelectedIndex(0);
     }
 
+    private static class BKGPanel extends JPanel {
+
+        @Override
+        public void paintComponent(Graphics graphics) {
+            super.paintComponent(graphics);
+            Graphics2D g = (Graphics2D) graphics;
+            g.drawImage(bkgImage, 0, 0, 754, 444, this);
+        }
+    }
+
+    static BufferedImage bkgImage = null;
+
+    static {
+        try {
+            bkgImage = ImageIO.read(new File("img/curtain.jpg"));
+            bkgImage = toBufferedImage(bkgImage.getScaledInstance(754, 444, Image.SCALE_SMOOTH));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton bingHelp;
     private javax.swing.JPanel bkgPanel;
     private javax.swing.JButton exit;
     private javax.swing.JScrollPane jScrollPane1;
@@ -344,7 +438,7 @@ public class QuestionGUI extends javax.swing.JFrame {
     private javax.swing.JLabel questionIndexDisplay;
     private javax.swing.JButton questionNext;
     private javax.swing.JButton questionPrevious;
-    private javax.swing.JList<String> questionSelect;
+    private javax.swing.JList questionSelect;
     private javax.swing.JTextArea questionText;
     private javax.swing.JButton submit;
     // End of variables declaration//GEN-END:variables
