@@ -198,9 +198,9 @@ public class MainGUI extends javax.swing.JFrame {
         
         public void drawButton(Graphics2D g) {
             int textw = 0;
-            int texth = 0;
+            int texth = 0; // change obama 
             FontMetrics fontMetric = g.getFontMetrics();
-            for (char c : text.toCharArray()) {
+            for (char c : text.toCharArray()) { 
                 textw += fontMetric.charWidth(c);
             }
             texth = fontMetric.getHeight();
