@@ -20,8 +20,9 @@ import net.billylieurance.azuresearch.AzureSearchWebResult;
  * @author He
  */
 public class BingResultDisplayGUI extends javax.swing.JFrame {
+	private static final long serialVersionUID = 1L;
 
-    static String replace = "(<.*>|\n|" + System.lineSeparator() + ")";
+	static String replace = "(<.*>|\n|" + System.lineSeparator() + ")";
     
     private List<GoogleResults.Result> results = null;
     int iter = 0;
@@ -32,9 +33,9 @@ public class BingResultDisplayGUI extends javax.swing.JFrame {
     public BingResultDisplayGUI(List<GoogleResults.Result> wr) {
         results = wr;
         initComponents();
+        previousResult.setEnabled(false);
         if (wr.isEmpty()) {
             nextResult.setEnabled(false);
-            previousResult.setEnabled(false);
             titleText.setText("No results available for search!");
         } else {
             GoogleResults.Result res = results.get(0);

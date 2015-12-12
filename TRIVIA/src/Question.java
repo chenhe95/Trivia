@@ -126,8 +126,10 @@ public class Question {
 			ResultSet rs = null;
 			try {
 				String qry = "SELECT * from (SELECT @row := @row +1 AS rownum, name, "
-						+ "rating FROM (SELECT @row := 0) r, movie.movies offset "
-						+ ") ranked WHERE rownum % " + skip + " = 1 AND rating > " + getRating(difficulty);
+						+ "rating FROM (SELECT @row := 0) r, movie.movies offset " + ") ranked WHERE rownum % " + skip
+						+ " = 1 AND rating > " + getRating(difficulty);
+				qry = "select M.name as name from movie.movies as M where M.mid % " + skip + " = 1 and M.rating > "
+						+ getRating(difficulty);
 
 				Statement s = connection.createStatement();
 				System.out.println("Executing: " + qry);
@@ -182,6 +184,10 @@ public class Question {
 				// join into movie_genre
 				String preQuery = "(SELECT * from (SELECT @row := @row +1 as rownum, name as name, mid as mid, rating as rating FROM (SELECT @row := 0) r, movie.movies) ranked WHERE rownum % "
 						+ skip + " = 1 AND rating > " + getRating(difficulty) + ")";
+
+				preQuery = "(select M.name as name, M.mid as mid from movie.movies as M where M.mid % " + skip
+						+ " = 1 and M.rating > " + getRating(difficulty) + ")";
+
 				qry = "select movie.movie_genre.genre as m_genre, T.name as m_name from movie.movie_genre inner join "
 						+ preQuery + "as T on T.mid = movie.movie_genre.mid";
 
@@ -207,7 +213,7 @@ public class Question {
 			break;
 		case 2:
 		case 3:
-                    /*
+
 			skip = 10 + (int) (Math.random() * 180000);
 			connection = DBConnect.getConnection();
 			LinkedHashMap<String, SQLGenreSet> map3 = new LinkedHashMap<>();
@@ -215,15 +221,17 @@ public class Question {
 				String qry = "SELECT a.name as actor, m.name as movie FROM movie.actors a, movies.movie m "
 						+ "INNER JOIN movies.acts act ON m.mid = acts.mid and acts.aid = a.aid "
 						+ "WHERE m.mid IN (SELECT mid from (SELECT @row := @row +1 AS rownum, mid as mid"
-						+ "rating FROM (SELECT @row := 0) r, movie.movies offset "
-						+ ") ranked WHERE rownum % " + skip + " = 1 AND rating > " + getRating(difficulty) + ")";
+						+ "rating FROM (SELECT @row := 0) r, movie.movies offset " + ") ranked WHERE rownum % " + skip
+						+ " = 1 AND rating > " + getRating(difficulty) + ")";
+				qry = "select A.name as actor, M.name as movie from movie.actors as A inner join movie.acts as AM on A.aid = AM.aid inner join movie.movies M on AM.mid = M.mid where M.mid % "
+						+ skip + " = 1 and M.rating > " + getRating(difficulty);
 				Statement s3 = connection.createStatement();
 				System.out.println("Executing: " + qry);
 				rs = s3.executeQuery(qry);
 				while (rs.next() && map3.size() <= choiceSize) {
 					String actor = rs.getString("actor");
 					String movie = rs.getString("movie");
-					if (!map3.containsKey(actor)){
+					if (!map3.containsKey(actor)) {
 						map3.put(actor, new SQLGenreSet());
 					}
 					SQLGenreSet set = map3.get(actor);
@@ -236,7 +244,8 @@ public class Question {
 					connection.close();
 				}
 			}
-			break; */
+			break;
+
 		case 4:
 		case 5:
 		case 6:
@@ -250,8 +259,8 @@ public class Question {
 			try {
 				String qry = "(SELECT * from (SELECT @row := @row +1 as rownum, aid as aid, "
 						+ "mid as mid FROM (SELECT @row := 0) r, movie.acts) "
-						+ "ranked WHERE rownum % 1 = 0 order by mid desc limit "
-						+ skip + ", 200000)";
+						+ "ranked WHERE rownum % 1 = 0 order by mid desc limit " + skip + ", 200000)";
+				qry = "select A.aid as aid, A.mid as mid from movie.acts as A limit " + skip + ", 200000";
 				Statement s = connection.createStatement();
 				System.out.println("Executing: " + qry);
 				rs = s.executeQuery(qry);
@@ -345,7 +354,8 @@ public class Question {
 			try {
 				String qry = "select * from (select @row := @row +1 as rownum, A.name as a_name, A.Date_of_birth as a_DOB from (SELECT @row := 0) r, movie.actors as A where A.Date_of_birth like '%%%%-%%-%%') ranked where rownum % "
 						+ skip + " = 1";
-
+				qry = "select A.name as a_name, A.Date_of_birth as a_DOB from movie.actors as A where A.Date_of_birth like '%%%%-%%-%%' and aid % "
+						+ skip + " = 1";
 				Statement s = connection.createStatement();
 				System.out.println("Executing: " + qry);
 				rs = s.executeQuery(qry);
@@ -574,11 +584,13 @@ public class Question {
 			question = question + ") was made the earliest?";
 			return new Question(question, choices, answer);
 		case 3:
-			/*// which movie has actor X acted in
+ /*
+			// which movie has actor X acted in
 			if (!cacheContainsKey(3, difficulty) || Math.random() <= refreshThreshold) {
 				loadIndex(3, difficulty, choiceSize, skipElements);
 			}
-			// Instead of movies and genres, they are actors and movies but that's good enough
+			// Instead of movies and genres, they are actors and movies but
+			// that's good enough
 			movies = (ArrayList<String>) questionCache.get(getCacheKey(3, difficulty)).getPropertyList();
 			genres = (ArrayList<SQLGenreSet>) questionCache.get(getCacheKey(3, difficulty)).getAnswerList();
 
@@ -597,7 +609,7 @@ public class Question {
 			String answer3 = genreSetSelected.getList().remove(0);
 			genreSetSelected.addGenre(answer3);
 			chosen3.add(answer3);
-			
+
 			for (int i = 0; i < choiceLimit - 1; ++i) {
 				int index = (int) (Math.random() * movies.size());
 				SQLGenreSet genreSet = genres.get(index);
@@ -607,7 +619,7 @@ public class Question {
 						continue;
 					}
 					String movanswer = genreSet.getList().remove(0);
-					if (!genreSetSelected.contains(movanswer) && !chosen3.contains(movanswer)){
+					if (!genreSetSelected.contains(movanswer) && !chosen3.contains(movanswer)) {
 						choices.add(movanswer);
 						chosen3.add(movanswer);
 					} else {
@@ -619,13 +631,16 @@ public class Question {
 			}
 			answer = (int) (Math.random() * (choices.size() + 1));
 			choices.add(answer, answer3);
-			return new Question(question, choices, answer); */
+			return new Question(question, choices, answer);*/
+
 		case 4:
+
 			/*// which movie has actor X not acted in
 			if (!cacheContainsKey(3, difficulty) || Math.random() <= refreshThreshold) {
 				loadIndex(3, difficulty, choiceSize, skipElements);
 			}
-			// Instead of movies and genres, they are actors and movies but that's good enough
+			// Instead of movies and genres, they are actors and movies but
+			// that's good enough
 			movies = (ArrayList<String>) questionCache.get(getCacheKey(3, difficulty)).getPropertyList();
 			genres = (ArrayList<SQLGenreSet>) questionCache.get(getCacheKey(3, difficulty)).getAnswerList();
 
@@ -641,11 +656,11 @@ public class Question {
 			question = "What movie has " + movieSelected + " NOT acted in?";
 			genreSetSelected = genres.get(indexSelected);
 			HashSet<String> chosen4 = new HashSet<>();
-			for (int i = 0; i < choiceLimit - 1 && i < genreSetSelected.getList().size(); ++i){
+			for (int i = 0; i < choiceLimit - 1 && i < genreSetSelected.getList().size(); ++i) {
 				chosen4.add(genreSetSelected.getList().get(i));
 			}
 			String answer4 = null;
-			while (answer4 == null){
+			while (answer4 == null) {
 				int index = (int) (Math.random() * movies.size());
 				SQLGenreSet genreSet = genres.get(index);
 				if (index != indexSelected) {
@@ -653,15 +668,16 @@ public class Question {
 						continue;
 					}
 					String movanswer = genreSet.getList().remove(0);
-					if (!genreSetSelected.contains(movanswer) && !chosen4.contains(movanswer)){
+					if (!genreSetSelected.contains(movanswer) && !chosen4.contains(movanswer)) {
 						choices.add(movanswer);
 						answer4 = movanswer;
 					}
-				} 
+				}
 			}
 			answer = (int) (Math.random() * (choices.size() + 1));
 			choices.add(answer, answer4);
-			return new Question(question, choices, answer);*/
+			return new Question(question, choices, answer);
+		*/
 		case 5:
 		case 6:
 			// just re-generate question since incomplete code
